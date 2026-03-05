@@ -1,11 +1,35 @@
 @using Blackjack.Domain.Models
 
 <div class="result-overlay @(IsVisible ? "visible" : "")">
-    <div class="result-card @ResultClass">
-        <div class="result-emoji">@ResultEmoji</div>
-        <h2 class="result-title">@ResultTitle</h2>
-        <p class="result-payout">@PayoutText</p>
-    </div>
+    @if (IsSplitResult)
+    {
+        <div class="result-card split-result @OverallResultClass">
+            <div class="result-emoji">@OverallEmoji</div>
+            <h2 class="result-title">@OverallTitle</h2>
+            <div class="split-results-detail">
+                @for (int i = 0; i < SplitResults!.Count; i++)
+                {
+                    var result = SplitResults[i];
+                    var bet = SplitBets!.Count > i ? SplitBets[i] : 0m;
+                    <div class="split-hand-result @GetResultClass(result)">
+                        <span class="split-hand-label">Hand @(i + 1)</span>
+                        <span class="split-hand-emoji">@GetResultEmoji(result)</span>
+                        <span class="split-hand-title">@GetResultTitle(result)</span>
+                        <span class="split-hand-payout">@GetHandPayoutText(result, bet)</span>
+                    </div>
+                }
+            </div>
+            <p class="result-payout total-payout">Total: @TotalPayoutText</p>
+        </div>
+    }
+    else
+    {
+        <div class="result-card @ResultClass">
+            <div class="result-emoji">@ResultEmoji</div>
+            <h2 class="result-title">@ResultTitle</h2>
+            <p class="result-payout">@PayoutText</p>
+        </div>
+    }
 </div>
 
 @code {
@@ -13,24 +37,14 @@
     [Parameter] public decimal Payout { get; set; }
     [Parameter] public decimal Bet { get; set; }
     [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public List<GameResult?>? SplitResults { get; set; }
+    [Parameter] public List<decimal>? SplitBets { get; set; }
 
-    private string ResultClass => Result switch
-    {
-        GameResult.Win => "result-win",
-        GameResult.Blackjack => "result-blackjack",
-        GameResult.Push => "result-push",
-        GameResult.Lose => "result-lose",
-        _ => ""
-    };
+    private bool IsSplitResult => SplitResults is not null && SplitResults.Count > 1;
 
-    private string ResultEmoji => Result switch
-    {
-        GameResult.Win => "🎉",
-        GameResult.Blackjack => "🃏",
-        GameResult.Push => "🤝",
-        GameResult.Lose => "😞",
-        _ => ""
-    };
+    // Single-hand helpers
+    private string ResultClass => GetResultClass(Result);
+    private string ResultEmoji => GetResultEmoji(Result);
 
     private string ResultTitle => Result switch
     {
@@ -50,5 +64,99 @@
             decimal profit = Payout - Bet;
             return $"+${profit:F0}";
         }
+    }
+
+    // Split-hand helpers
+    private string OverallResultClass
+    {
+        get
+        {
+            if (SplitResults is null) return "";
+            bool allWin = SplitResults.All(r => r == GameResult.Win || r == GameResult.Blackjack);
+            bool allLose = SplitResults.All(r => r == GameResult.Lose);
+            bool allPush = SplitResults.All(r => r == GameResult.Push);
+            if (allWin) return "result-win";
+            if (allLose) return "result-lose";
+            if (allPush) return "result-push";
+            return "result-mixed";
+        }
+    }
+
+    private string OverallEmoji
+    {
+        get
+        {
+            if (SplitResults is null) return "";
+            bool allWin = SplitResults.All(r => r == GameResult.Win || r == GameResult.Blackjack);
+            bool allLose = SplitResults.All(r => r == GameResult.Lose);
+            bool allPush = SplitResults.All(r => r == GameResult.Push);
+            if (allWin) return "🎉";
+            if (allLose) return "😞";
+            if (allPush) return "🤝";
+            return "🔀";
+        }
+    }
+
+    private string OverallTitle
+    {
+        get
+        {
+            if (SplitResults is null) return "";
+            bool allWin = SplitResults.All(r => r == GameResult.Win || r == GameResult.Blackjack);
+            bool allLose = SplitResults.All(r => r == GameResult.Lose);
+            bool allPush = SplitResults.All(r => r == GameResult.Push);
+            if (allWin) return "Both Hands Win!";
+            if (allLose) return "Both Hands Lose";
+            if (allPush) return "Both Hands Push";
+            return "Split Results";
+        }
+    }
+
+    private string TotalPayoutText
+    {
+        get
+        {
+            decimal totalBet = SplitBets?.Sum() ?? Bet;
+            decimal net = Payout - totalBet;
+            if (net > 0) return $"+${net:F0}";
+            if (net < 0) return $"-${Math.Abs(net):F0}";
+            return "Bets returned";
+        }
+    }
+
+    private static string GetResultClass(GameResult? result) => result switch
+    {
+        GameResult.Win => "result-win",
+        GameResult.Blackjack => "result-blackjack",
+        GameResult.Push => "result-push",
+        GameResult.Lose => "result-lose",
+        _ => ""
+    };
+
+    private static string GetResultEmoji(GameResult? result) => result switch
+    {
+        GameResult.Win => "🎉",
+        GameResult.Blackjack => "🃏",
+        GameResult.Push => "🤝",
+        GameResult.Lose => "😞",
+        _ => ""
+    };
+
+    private static string GetResultTitle(GameResult? result) => result switch
+    {
+        GameResult.Win => "Win",
+        GameResult.Blackjack => "Blackjack!",
+        GameResult.Push => "Push",
+        GameResult.Lose => "Lose",
+        _ => ""
+    };
+
+    private static string GetHandPayoutText(GameResult? result, decimal bet)
+    {
+        if (result == GameResult.Lose) return $"-${bet:F0}";
+        if (result == GameResult.Push) return "$0";
+        if (result == GameResult.Win) return $"+${bet:F0}";
+        if (result == GameResult.Blackjack) return $"+${bet * 1.5m:F0}";
+        return "";
     }
 }

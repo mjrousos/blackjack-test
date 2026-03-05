@@ -440,6 +440,150 @@ public class BlackjackGameTests
             // After splitting aces, should go to DealerTurn (auto-stand)
             game.State.Should().Be(GameState.DealerTurn);
         }
+
+        [Fact]
+        public void Split_ResolvesResultsForBothHands()
+        {
+            var game = CreateGameWithSplittablePair();
+            game.Split();
+
+            // Play through both hands by standing
+            while (game.State == GameState.PlayerTurn)
+            {
+                game.Stand();
+            }
+
+            if (game.State == GameState.DealerTurn)
+            {
+                game.ResolveDealerTurn();
+            }
+
+            game.State.Should().Be(GameState.Resolved);
+            game.SplitResults.Should().HaveCount(2);
+            game.SplitResults[0].Should().NotBeNull();
+            game.SplitResults[1].Should().NotBeNull();
+        }
+
+        [Fact]
+        public void Split_SplitResultsMatchIndividualHandOutcomes()
+        {
+            var game = CreateGameWithSplittablePair();
+            game.Split();
+
+            while (game.State == GameState.PlayerTurn)
+            {
+                game.Stand();
+            }
+
+            if (game.State == GameState.DealerTurn)
+            {
+                game.ResolveDealerTurn();
+            }
+
+            // Verify each result is consistent with hand vs dealer comparison
+            for (int i = 0; i < game.SplitResults.Count; i++)
+            {
+                var hand = i == 0 ? game.PlayerHand : game.SplitHands[i - 1];
+                var expected = GetExpectedResult(hand, game.DealerHand);
+                game.SplitResults[i].Should().Be(expected, $"Hand {i + 1} result should match hand-vs-dealer comparison");
+            }
+        }
+
+        [Fact]
+        public void Split_PayoutAccountsForBothHands()
+        {
+            var game = CreateGameWithSplittablePair();
+            var balanceAfterBet = game.PlayerBalance;
+            game.Split();
+            var balanceAfterSplit = game.PlayerBalance;
+
+            // Split should deduct another bet
+            balanceAfterSplit.Should().Be(balanceAfterBet - game.SplitBets[0]);
+
+            while (game.State == GameState.PlayerTurn)
+            {
+                game.Stand();
+            }
+
+            if (game.State == GameState.DealerTurn)
+            {
+                game.ResolveDealerTurn();
+            }
+
+            // Payout should be sum of both hand payouts
+            var totalPayout = game.CalculatePayout();
+            decimal expectedTotal = 0m;
+            for (int i = 0; i < game.SplitResults.Count; i++)
+            {
+                expectedTotal += game.SplitResults[i] switch
+                {
+                    GameResult.Win => game.SplitBets[i] * 2,
+                    GameResult.Blackjack => game.SplitBets[i] * 2.5m,
+                    GameResult.Push => game.SplitBets[i],
+                    _ => 0m
+                };
+            }
+            totalPayout.Should().Be(expectedTotal);
+        }
+
+        [Fact]
+        public void Split_SplitBetsHaveTwoEntries()
+        {
+            var game = CreateGameWithSplittablePair();
+            game.Split();
+            game.SplitBets.Should().HaveCount(2);
+            game.SplitBets[0].Should().Be(game.SplitBets[1], "both split bets should equal the original bet");
+        }
+
+        [Fact]
+        public void Split_ActiveHandIndexAdvancesToSecondHand()
+        {
+            // Find a non-ace splittable pair so it doesn't auto-stand
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(10);
+                game.Deal();
+                if (game.State == GameState.PlayerTurn &&
+                    game.PlayerHand.CanSplit &&
+                    game.PlayerHand.Cards[0].Rank != Rank.Ace)
+                {
+                    game.Split();
+                    game.ActiveHandIndex.Should().Be(0, "should start on first hand after split");
+
+                    game.Stand(); // finish first hand
+                    game.ActiveHandIndex.Should().Be(1, "should advance to second hand after standing on first");
+                    return;
+                }
+            }
+            throw new InvalidOperationException("Could not find a seed for non-ace pair.");
+        }
+
+        [Fact]
+        public void SplittingAces_ResolvesResultsForBothHands()
+        {
+            var game = CreateGameWithAcePair();
+            game.Split();
+
+            if (game.State == GameState.DealerTurn)
+            {
+                game.ResolveDealerTurn();
+            }
+
+            game.State.Should().Be(GameState.Resolved);
+            game.SplitResults.Should().HaveCount(2);
+            game.SplitResults[0].Should().NotBeNull();
+            game.SplitResults[1].Should().NotBeNull();
+        }
+
+        private static GameResult GetExpectedResult(Hand playerHand, Hand dealerHand)
+        {
+            if (playerHand.IsBust) return GameResult.Lose;
+            if (dealerHand.IsBust) return GameResult.Win;
+            if (playerHand.Score > dealerHand.Score) return GameResult.Win;
+            if (playerHand.Score < dealerHand.Score) return GameResult.Lose;
+            return GameResult.Push;
+        }
     }
 
     public class ResolveDealerTurnTests

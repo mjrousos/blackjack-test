@@ -89,6 +89,27 @@
 /* Card Hand */
 .card-hand {
     margin: 1rem 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    border-radius: 12px;
+    padding: 0.5rem;
+}
+
+.card-hand.hand-active {
+    box-shadow: 0 0 12px rgba(201, 164, 76, 0.6), 0 0 24px rgba(201, 164, 76, 0.3);
+    border: 1px solid rgba(201, 164, 76, 0.4);
+    background: rgba(201, 164, 76, 0.05);
+}
+
+.card-hand.hand-inactive {
+    opacity: 0.5;
+    transform: scale(0.97);
+}
+
+.split-hands-container {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .hand-label {
@@ -220,6 +241,69 @@
     font-size: 1.3rem;
     color: #e8e0d0;
     font-weight: bold;
+}
+
+/* Split result overlay */
+.split-result .split-results-detail {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.split-hand-result {
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    border: 1px solid;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 120px;
+}
+
+.split-hand-result.result-win { border-color: #2ecc71; }
+.split-hand-result.result-blackjack { border-color: #c9a44c; }
+.split-hand-result.result-push { border-color: #95a5a6; }
+.split-hand-result.result-lose { border-color: #e74c3c; }
+
+.split-hand-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #c9a44c;
+    font-weight: 600;
+}
+
+.split-hand-emoji {
+    font-size: 1.5rem;
+}
+
+.split-hand-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #e8e0d0;
+}
+
+.split-hand-payout {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #e8e0d0;
+}
+
+.split-hand-result.result-win .split-hand-title { color: #2ecc71; }
+.split-hand-result.result-blackjack .split-hand-title { color: #c9a44c; }
+.split-hand-result.result-push .split-hand-title { color: #95a5a6; }
+.split-hand-result.result-lose .split-hand-title { color: #e74c3c; }
+
+.result-mixed { border-color: #c9a44c; }
+.result-mixed .result-title { color: #c9a44c; }
+
+.total-payout {
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(232, 224, 208, 0.2);
 }
 
 /* Deal Animation */

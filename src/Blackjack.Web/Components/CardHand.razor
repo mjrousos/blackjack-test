@@ -1,8 +1,8 @@
 @using Blackjack.Domain.Models
 
-<div class="card-hand @(IsDealer ? "dealer-hand" : "player-hand")">
+<div class="card-hand @(IsDealer ? "dealer-hand" : "player-hand") @(IsActive ? "hand-active" : "") @(ShowInactive ? "hand-inactive" : "")">
     <div class="hand-label">
-        <span class="hand-title">@Label</span>
+        <span class="hand-title">@Label@(IsActive ? " 👈" : "")</span>
         @if (ShowScore && Hand is not null)
         {
             <span class="hand-score @ScoreClass">@GetScoreDisplay()</span>
@@ -28,6 +28,7 @@
     [Parameter] public bool HideSecondCard { get; set; }
     [Parameter] public bool ShowScore { get; set; } = true;
     [Parameter] public bool IsActive { get; set; }
+    [Parameter] public bool ShowInactive { get; set; }
 
     private string ScoreClass
     {

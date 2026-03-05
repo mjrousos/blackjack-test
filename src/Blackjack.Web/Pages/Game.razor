@@ -42,14 +42,20 @@
     {
         @if (GameService.SplitHands.Count > 0)
         {
-            <CardHand Hand="@GameService.PlayerHand" Label="Hand 1" IsDealer="false"
-                      ShowScore="true" IsActive="@(GameService.ActiveHandIndex == 0 && GameService.State == GameState.PlayerTurn)" />
-            @for (int i = 0; i < GameService.SplitHands.Count; i++)
-            {
-                var handIndex = i + 1;
-                <CardHand Hand="@GameService.SplitHands[i]" Label="@($"Hand {handIndex + 1}")" IsDealer="false"
-                          ShowScore="true" IsActive="@(GameService.ActiveHandIndex == handIndex && GameService.State == GameState.PlayerTurn)" />
-            }
+            <div class="split-hands-container">
+                <CardHand Hand="@GameService.PlayerHand" Label="Hand 1" IsDealer="false"
+                          ShowScore="true"
+                          IsActive="@(GameService.ActiveHandIndex == 0 && GameService.State == GameState.PlayerTurn)"
+                          ShowInactive="@(GameService.ActiveHandIndex != 0 && GameService.State == GameState.PlayerTurn)" />
+                @for (int i = 0; i < GameService.SplitHands.Count; i++)
+                {
+                    var handIndex = i + 1;
+                    <CardHand Hand="@GameService.SplitHands[i]" Label="@($"Hand {handIndex + 1}")" IsDealer="false"
+                              ShowScore="true"
+                              IsActive="@(GameService.ActiveHandIndex == handIndex && GameService.State == GameState.PlayerTurn)"
+                              ShowInactive="@(GameService.ActiveHandIndex != handIndex && GameService.State == GameState.PlayerTurn)" />
+                }
+            </div>
         }
         else
         {
@@ -161,7 +167,8 @@
 
 @* Result Overlay *@
 <GameResultOverlay Result="@GameService.Result" Payout="@GameService.LastPayout"
-                   Bet="@GameService.CurrentBet" IsVisible="@showResult" />
+                   Bet="@GameService.CurrentBet" IsVisible="@showResult"
+                   SplitResults="@GameService.SplitResults" SplitBets="@GameService.SplitBets" />
 @if (showResult)
 {
     <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 101;"
