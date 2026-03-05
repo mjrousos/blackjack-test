@@ -1,0 +1,173 @@
+@page "/dashboard"
+@attribute [Authorize]
+@using Blackjack.Domain.Models
+@using Blackjack.Infrastructure.Data
+@using Blackjack.Infrastructure.Repositories
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IPlayerRepository PlayerRepository
+@inject IGameHistoryRepository GameHistoryRepository
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+@rendermode RenderMode.InteractiveServer
+
+<PageTitle>Dashboard - Blackjack</PageTitle>
+
+<div class="dashboard">
+    <h1>📊 Dashboard</h1>
+
+    @if (isLoading)
+    {
+        <p class="text-gold">Loading your stats...</p>
+    }
+    else
+    {
+        @* Balance Section *@
+        <div class="panel balance-panel mt-2">
+            <div class="balance-display-large">
+                <span class="balance-title">Your Balance</span>
+                <span class="balance-amount-large">$@balance.ToString("N0")</span>
+            </div>
+            @if (balance <= 0)
+            {
+                <button class="btn btn-success" @onclick="RefillBalance">🔄 Refill to $1,000</button>
+            }
+            <button class="btn btn-primary" @onclick="NavigateToGame">🎰 Play Now</button>
+        </div>
+
+        @* Stats Grid *@
+        <div class="stats-grid mt-2">
+            <div class="stat-card panel">
+                <span class="stat-value">@stats.TotalGames</span>
+                <span class="stat-label">Games Played</span>
+            </div>
+            <div class="stat-card panel">
+                <span class="stat-value text-green">@stats.WinRate.ToString("F1")%</span>
+                <span class="stat-label">Win Rate</span>
+            </div>
+            <div class="stat-card panel">
+                <span class="stat-value text-gold">@stats.Wins</span>
+                <span class="stat-label">Wins</span>
+            </div>
+            <div class="stat-card panel">
+                <span class="stat-value text-red">@stats.Losses</span>
+                <span class="stat-label">Losses</span>
+            </div>
+            <div class="stat-card panel">
+                <span class="stat-value">@stats.Pushes</span>
+                <span class="stat-label">Pushes</span>
+            </div>
+            <div class="stat-card panel">
+                <span class="stat-value text-gold">@stats.Blackjacks</span>
+                <span class="stat-label">Blackjacks</span>
+            </div>
+            <div class="stat-card panel">
+                <span class="stat-value">$@stats.BiggestWin.ToString("N0")</span>
+                <span class="stat-label">Biggest Win</span>
+            </div>
+            <div class="stat-card panel">
+                <span class="stat-value @(stats.NetProfitLoss >= 0 ? "text-green" : "text-red")">
+                    @(stats.NetProfitLoss >= 0 ? "+" : "")$@stats.NetProfitLoss.ToString("N0")
+                </span>
+                <span class="stat-label">Net Profit/Loss</span>
+            </div>
+            <div class="stat-card panel">
+                <span class="stat-value">$@stats.TotalWagered.ToString("N0")</span>
+                <span class="stat-label">Total Wagered</span>
+            </div>
+        </div>
+
+        @* Recent Games *@
+        <div class="panel mt-2">
+            <div class="flex justify-between items-center mb-1">
+                <h2>Recent Games</h2>
+                <a href="/history" class="btn btn-primary" style="font-size: 0.85rem;">View All</a>
+            </div>
+            @if (recentGames.Count == 0)
+            {
+                <p>No games played yet. <a href="/" class="text-gold">Start playing!</a></p>
+            }
+            else
+            {
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Bet</th>
+                            <th>Result</th>
+                            <th>Payout</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var game in recentGames)
+                        {
+                            <tr>
+                                <td>@game.EndedAt.ToString("MMM dd, HH:mm")</td>
+                                <td>$@game.InitialBet.ToString("N0")</td>
+                                <td class="@GetResultClass(game.Result)">@GetResultDisplay(game.Result)</td>
+                                <td class="@(game.FinalPayout > game.InitialBet ? "text-green" : game.FinalPayout < game.InitialBet ? "text-red" : "")">
+                                    $@game.FinalPayout.ToString("N0")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private decimal balance;
+    private PlayerStatistics stats = new();
+    private List<GameRecord> recentGames = new();
+    private string? userId;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId != null)
+            {
+                balance = await PlayerRepository.GetBalanceAsync(userId);
+                stats = await GameHistoryRepository.GetStatisticsAsync(userId);
+                var (records, _) = await GameHistoryRepository.GetHistoryAsync(userId, 1, 5);
+                recentGames = records;
+            }
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void NavigateToGame() => Navigation.NavigateTo("/");
+
+    private async Task RefillBalance()
+    {
+        if (userId != null)
+        {
+            await PlayerRepository.RefillBalanceAsync(userId, 1000m);
+            balance = await PlayerRepository.GetBalanceAsync(userId);
+        }
+    }
+
+    private static string GetResultClass(GameResult result) => result switch
+    {
+        GameResult.Win => "text-green",
+        GameResult.Blackjack => "text-gold",
+        GameResult.Push => "",
+        GameResult.Lose => "text-red",
+        _ => ""
+    };
+
+    private static string GetResultDisplay(GameResult result) => result switch
+    {
+        GameResult.Win => "Win",
+        GameResult.Blackjack => "Blackjack!",
+        GameResult.Push => "Push",
+        GameResult.Lose => "Loss",
+        _ => result.ToString()
+    };
+}

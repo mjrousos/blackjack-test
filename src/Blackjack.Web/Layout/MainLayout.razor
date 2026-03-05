@@ -1,0 +1,40 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <header class="top-bar">
+        <div class="brand">
+            <span class="brand-icon">🃏</span>
+            <span class="brand-name">Blackjack</span>
+        </div>
+        <nav class="nav-links">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="nav-icon">🎰</span> Play
+            </NavLink>
+            <NavLink class="nav-link" href="dashboard">
+                <span class="nav-icon">📊</span> Dashboard
+            </NavLink>
+            <NavLink class="nav-link" href="history">
+                <span class="nav-icon">📜</span> History
+            </NavLink>
+        </nav>
+        <div class="user-section">
+            <AuthorizeView>
+                <Authorized>
+                    <span class="balance-display">💰 @context.User.Identity?.Name</span>
+                    <form method="post" action="Account/Logout">
+                        <button type="submit" class="btn-logout">Logout</button>
+                    </form>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="Account/Login" class="btn-login">Login</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </header>
+
+    <main class="content">
+        <article class="game-area">
+            @Body
+        </article>
+    </main>
+</div>

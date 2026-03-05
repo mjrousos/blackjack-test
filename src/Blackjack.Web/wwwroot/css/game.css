@@ -1,0 +1,159 @@
+.game-table {
+    max-width: 700px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.balance-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(201, 164, 76, 0.3);
+    border-radius: 10px;
+    padding: 0.75rem 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.balance-amount {
+    display: flex;
+    flex-direction: column;
+}
+
+.balance-label {
+    font-size: 0.75rem;
+    color: #a09880;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.balance-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #c9a44c;
+}
+
+.current-bet {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bet-label {
+    color: #e8e0d0;
+    font-weight: 600;
+}
+
+/* Betting Area */
+.betting-area {
+    text-align: center;
+    padding: 2rem;
+}
+
+.betting-area h2 {
+    margin-bottom: 1.5rem;
+}
+
+.chip-selector {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.chip-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px dashed rgba(255, 255, 255, 0.4);
+    background: linear-gradient(135deg, #2c3e50, #1a252f);
+    color: #c9a44c;
+    font-weight: bold;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chip-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(201, 164, 76, 0.5);
+}
+
+.chip-btn.selected {
+    border-color: #c9a44c;
+    background: linear-gradient(135deg, #c9a44c, #a07830);
+    color: #1a0f0a;
+    transform: scale(1.15);
+    box-shadow: 0 0 15px rgba(201, 164, 76, 0.7);
+}
+
+.bet-confirm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 0;
+}
+
+.action-buttons .btn {
+    min-width: 120px;
+    font-size: 1rem;
+    padding: 0.75rem 1.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chip-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 0.65rem;
+    }
+
+    .action-buttons .btn {
+        min-width: 100px;
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+    }
+
+    .balance-value {
+        font-size: 1.2rem;
+    }
+}
+
+/* Quick Deal & Bet Changer */
+.quick-deal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #c9a44c;
+    color: #c9a44c;
+    padding: 0.4rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    background: rgba(201, 164, 76, 0.2);
+    color: #fff;
+}

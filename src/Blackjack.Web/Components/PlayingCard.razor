@@ -1,0 +1,52 @@
+@using Blackjack.Domain.Models
+
+<div class="playing-card @(FaceDown ? "face-down" : "") @(IsNew ? "deal-animation" : "") @SuitColorClass">
+    @if (FaceDown)
+    {
+        <div class="card-back">
+            <div class="card-back-pattern"></div>
+        </div>
+    }
+    else if (Card is not null)
+    {
+        <div class="card-face">
+            <div class="card-corner top-left">
+                <span class="card-rank">@GetRankDisplay()</span>
+                <span class="card-suit-small">@GetSuitSymbol()</span>
+            </div>
+            <div class="card-center">
+                <span class="card-suit-large">@GetSuitSymbol()</span>
+            </div>
+            <div class="card-corner bottom-right">
+                <span class="card-rank">@GetRankDisplay()</span>
+                <span class="card-suit-small">@GetSuitSymbol()</span>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Card? Card { get; set; }
+    [Parameter] public bool FaceDown { get; set; }
+    [Parameter] public bool IsNew { get; set; }
+
+    private string SuitColorClass => Card?.Suit is Suit.Hearts or Suit.Diamonds ? "red-suit" : "black-suit";
+
+    private string GetRankDisplay() => Card?.Rank switch
+    {
+        Rank.Ace => "A",
+        Rank.Jack => "J",
+        Rank.Queen => "Q",
+        Rank.King => "K",
+        _ => ((int)(Card?.Rank ?? 0)).ToString()
+    };
+
+    private string GetSuitSymbol() => Card?.Suit switch
+    {
+        Suit.Hearts => "♥",
+        Suit.Diamonds => "♦",
+        Suit.Clubs => "♣",
+        Suit.Spades => "♠",
+        _ => ""
+    };
+}

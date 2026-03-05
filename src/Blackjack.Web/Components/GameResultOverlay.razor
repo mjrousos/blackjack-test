@@ -1,0 +1,54 @@
+@using Blackjack.Domain.Models
+
+<div class="result-overlay @(IsVisible ? "visible" : "")">
+    <div class="result-card @ResultClass">
+        <div class="result-emoji">@ResultEmoji</div>
+        <h2 class="result-title">@ResultTitle</h2>
+        <p class="result-payout">@PayoutText</p>
+    </div>
+</div>
+
+@code {
+    [Parameter] public GameResult? Result { get; set; }
+    [Parameter] public decimal Payout { get; set; }
+    [Parameter] public decimal Bet { get; set; }
+    [Parameter] public bool IsVisible { get; set; }
+
+    private string ResultClass => Result switch
+    {
+        GameResult.Win => "result-win",
+        GameResult.Blackjack => "result-blackjack",
+        GameResult.Push => "result-push",
+        GameResult.Lose => "result-lose",
+        _ => ""
+    };
+
+    private string ResultEmoji => Result switch
+    {
+        GameResult.Win => "🎉",
+        GameResult.Blackjack => "🃏",
+        GameResult.Push => "🤝",
+        GameResult.Lose => "😞",
+        _ => ""
+    };
+
+    private string ResultTitle => Result switch
+    {
+        GameResult.Win => "You Win!",
+        GameResult.Blackjack => "Blackjack!",
+        GameResult.Push => "Push",
+        GameResult.Lose => "Dealer Wins",
+        _ => ""
+    };
+
+    private string PayoutText
+    {
+        get
+        {
+            if (Result == GameResult.Lose) return $"-${Bet:F0}";
+            if (Result == GameResult.Push) return "Bet returned";
+            decimal profit = Payout - Bet;
+            return $"+${profit:F0}";
+        }
+    }
+}

@@ -1,0 +1,54 @@
+@using Blackjack.Domain.Models
+
+<div class="card-hand @(IsDealer ? "dealer-hand" : "player-hand")">
+    <div class="hand-label">
+        <span class="hand-title">@Label</span>
+        @if (ShowScore && Hand is not null)
+        {
+            <span class="hand-score @ScoreClass">@GetScoreDisplay()</span>
+        }
+    </div>
+    <div class="cards-container">
+        @if (Hand is not null)
+        {
+            @for (int i = 0; i < Hand.Cards.Count; i++)
+            {
+                var card = Hand.Cards[i];
+                bool isFaceDown = IsDealer && HideSecondCard && i == 1;
+                <PlayingCard Card="card" FaceDown="isFaceDown" IsNew="false" />
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Hand? Hand { get; set; }
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public bool IsDealer { get; set; }
+    [Parameter] public bool HideSecondCard { get; set; }
+    [Parameter] public bool ShowScore { get; set; } = true;
+    [Parameter] public bool IsActive { get; set; }
+
+    private string ScoreClass
+    {
+        get
+        {
+            if (Hand is null) return "";
+            if (Hand.IsBust) return "bust";
+            if (Hand.IsBlackjack) return "blackjack";
+            return "";
+        }
+    }
+
+    private string GetScoreDisplay()
+    {
+        if (Hand is null) return "";
+        if (IsDealer && HideSecondCard && Hand.Cards.Count > 0)
+        {
+            return Hand.Cards[0].Value.ToString();
+        }
+        if (Hand.IsBust) return $"{Hand.Score} BUST";
+        if (Hand.IsBlackjack) return "BLACKJACK!";
+        return Hand.Score.ToString();
+    }
+}

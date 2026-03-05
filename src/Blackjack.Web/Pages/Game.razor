@@ -1,0 +1,297 @@
+@page "/"
+@attribute [Authorize]
+@using Blackjack.Domain.Models
+@using Blackjack.Web.Services
+@using Blackjack.Web.Components
+@using Microsoft.AspNetCore.Components.Authorization
+@inject GameSessionService GameService
+@inject AuthenticationStateProvider AuthStateProvider
+@rendermode RenderMode.InteractiveServer
+
+<PageTitle>Blackjack - Play</PageTitle>
+
+<div class="game-table">
+    @* Balance Display *@
+    <div class="balance-bar">
+        <div class="balance-amount">
+            <span class="balance-label">Balance</span>
+            <span class="balance-value">$@GameService.PlayerBalance.ToString("N0")</span>
+        </div>
+        @if (GameService.PlayerBalance == 0 && GameService.State == GameState.WaitingForBet)
+        {
+            <button class="btn btn-success" @onclick="RefillBalance">🔄 Get $1,000</button>
+        }
+        @if (GameService.State != GameState.WaitingForBet)
+        {
+            <div class="current-bet">
+                <ChipStack Amount="@GameService.CurrentBet" />
+                <span class="bet-label">Bet: $@GameService.CurrentBet.ToString("N0")</span>
+            </div>
+        }
+    </div>
+
+    @* Dealer Hand *@
+    @if (GameService.State != GameState.WaitingForBet)
+    {
+        <CardHand Hand="@GameService.DealerHand" Label="Dealer" IsDealer="true"
+                  HideSecondCard="@GameService.IsDealerCardHidden" ShowScore="true" />
+    }
+
+    @* Player Hand(s) *@
+    @if (GameService.State != GameState.WaitingForBet)
+    {
+        @if (GameService.SplitHands.Count > 0)
+        {
+            <CardHand Hand="@GameService.PlayerHand" Label="Hand 1" IsDealer="false"
+                      ShowScore="true" IsActive="@(GameService.ActiveHandIndex == 0 && GameService.State == GameState.PlayerTurn)" />
+            @for (int i = 0; i < GameService.SplitHands.Count; i++)
+            {
+                var handIndex = i + 1;
+                <CardHand Hand="@GameService.SplitHands[i]" Label="@($"Hand {handIndex + 1}")" IsDealer="false"
+                          ShowScore="true" IsActive="@(GameService.ActiveHandIndex == handIndex && GameService.State == GameState.PlayerTurn)" />
+            }
+        }
+        else
+        {
+            <CardHand Hand="@GameService.PlayerHand" Label="Your Hand" IsDealer="false"
+                      ShowScore="true" IsActive="@(GameService.State == GameState.PlayerTurn)" />
+        }
+    }
+
+    @* Betting Area *@
+    @if (GameService.State == GameState.WaitingForBet)
+    {
+        <div class="betting-area panel">
+            @if (betAmount > 0 && betAmount <= GameService.PlayerBalance && !showChipSelector)
+            {
+                <h2>Ready to Deal</h2>
+                <div class="quick-deal">
+                    <button class="btn btn-primary" @onclick="PlaceAndDeal" style="font-size: 1.1rem; padding: 0.75rem 2rem;">
+                        🃏 Deal — $@betAmount.ToString("N0")
+                    </button>
+                    <button class="btn btn-outline" @onclick="ShowBetChanger">Change Bet</button>
+                </div>
+            }
+            else
+            {
+                <h2>Place Your Bet</h2>
+                <div class="chip-selector">
+                    @foreach (var chip in new[] { 5m, 10m, 25m, 50m, 100m, 250m, 500m })
+                    {
+                        if (chip <= GameService.PlayerBalance)
+                        {
+                            <button class="chip-btn @(betAmount == chip ? "selected" : "")"
+                                    @onclick="() => SetBet(chip)">
+                                $@chip.ToString("N0")
+                            </button>
+                        }
+                    }
+                </div>
+                @if (betAmount > 0)
+                {
+                    <div class="bet-confirm mt-2">
+                        <span class="text-gold" style="font-size: 1.2rem;">Bet: $@betAmount.ToString("N0")</span>
+                        <button class="btn btn-primary" @onclick="PlaceAndDeal">Deal</button>
+                    </div>
+                }
+            }
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <p class="text-red mt-1">@errorMessage</p>
+            }
+        </div>
+    }
+
+    @* Action Buttons *@
+    @if (GameService.State == GameState.PlayerTurn)
+    {
+        <div class="action-buttons">
+            @foreach (var action in GameService.AvailableActions)
+            {
+                <button class="btn @GetActionButtonClass(action)" @onclick="() => PerformAction(action)">
+                    @GetActionLabel(action)
+                </button>
+            }
+        </div>
+    }
+
+    @* Deal Again / Change Bet *@
+    @if (GameService.State == GameState.Resolved && !showResult)
+    {
+        <div class="betting-area panel">
+            @if (betAmount > 0 && betAmount <= GameService.PlayerBalance && !showChipSelector)
+            {
+                <div class="quick-deal">
+                    <button class="btn btn-primary" @onclick="DealAgain" style="font-size: 1.1rem; padding: 0.75rem 2rem;">
+                        🃏 Deal Again — $@betAmount.ToString("N0")
+                    </button>
+                    <button class="btn btn-outline" @onclick="ShowBetChanger">Change Bet</button>
+                </div>
+            }
+            else
+            {
+                <h2>Place Your Bet</h2>
+                <div class="chip-selector">
+                    @foreach (var chip in new[] { 5m, 10m, 25m, 50m, 100m, 250m, 500m })
+                    {
+                        if (chip <= GameService.PlayerBalance)
+                        {
+                            <button class="chip-btn @(betAmount == chip ? "selected" : "")"
+                                    @onclick="() => SetBet(chip)">
+                                $@chip.ToString("N0")
+                            </button>
+                        }
+                    }
+                </div>
+                @if (betAmount > 0)
+                {
+                    <div class="bet-confirm mt-2">
+                        <span class="text-gold" style="font-size: 1.2rem;">Bet: $@betAmount.ToString("N0")</span>
+                        <button class="btn btn-primary" @onclick="DealAgain">Deal</button>
+                    </div>
+                }
+            }
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <p class="text-red mt-1">@errorMessage</p>
+            }
+        </div>
+    }
+</div>
+
+@* Result Overlay *@
+<GameResultOverlay Result="@GameService.Result" Payout="@GameService.LastPayout"
+                   Bet="@GameService.CurrentBet" IsVisible="@showResult" />
+@if (showResult)
+{
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 101;"
+         @onclick="DismissResult"></div>
+}
+
+@code {
+    private decimal betAmount;
+    private string? errorMessage;
+    private bool showResult;
+    private bool initialized;
+    private bool showChipSelector;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !initialized)
+        {
+            initialized = true;
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            await GameService.InitializeAsync(authState.User);
+            StateHasChanged();
+        }
+    }
+
+    private void SetBet(decimal amount)
+    {
+        betAmount = amount;
+        errorMessage = null;
+    }
+
+    private async Task PlaceAndDeal()
+    {
+        try
+        {
+            errorMessage = null;
+            GameService.PlaceBet(betAmount);
+            GameService.Deal();
+
+            if (GameService.State == GameState.Resolved)
+            {
+                await GameService.FinalizeRoundAsync();
+                showResult = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task PerformAction(GameAction action)
+    {
+        try
+        {
+            errorMessage = null;
+            switch (action)
+            {
+                case GameAction.Hit:
+                    GameService.Hit();
+                    GameService.CheckAndResolveDealerTurn();
+                    break;
+                case GameAction.Stand:
+                    GameService.Stand();
+                    break;
+                case GameAction.DoubleDown:
+                    GameService.DoubleDown();
+                    break;
+                case GameAction.Split:
+                    GameService.Split();
+                    break;
+            }
+
+            if (GameService.State == GameState.Resolved)
+            {
+                await GameService.FinalizeRoundAsync();
+                showResult = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private void DismissResult()
+    {
+        showResult = false;
+    }
+
+    private void ShowBetChanger()
+    {
+        showChipSelector = true;
+    }
+
+    private void NewRound()
+    {
+        GameService.StartNewRound();
+        showChipSelector = false;
+        errorMessage = null;
+        showResult = false;
+    }
+
+    private async Task DealAgain()
+    {
+        GameService.StartNewRound();
+        showChipSelector = false;
+        showResult = false;
+        await PlaceAndDeal();
+    }
+
+    private async Task RefillBalance()
+    {
+        await GameService.RefillBalanceAsync();
+    }
+
+    private static string GetActionButtonClass(GameAction action) => action switch
+    {
+        GameAction.Hit => "btn-primary",
+        GameAction.Stand => "btn-danger",
+        GameAction.DoubleDown => "btn-success",
+        GameAction.Split => "btn-primary",
+        _ => "btn-primary"
+    };
+
+    private static string GetActionLabel(GameAction action) => action switch
+    {
+        GameAction.Hit => "✋ Hit",
+        GameAction.Stand => "🛑 Stand",
+        GameAction.DoubleDown => "⬆️ Double Down",
+        GameAction.Split => "✌️ Split",
+        _ => action.ToString()
+    };
+}

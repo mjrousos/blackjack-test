@@ -1,0 +1,124 @@
+.auth-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.auth-card {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(201, 164, 76, 0.4);
+    border-radius: 12px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header h1 {
+    font-family: 'Playfair Display', serif;
+    color: #c9a44c;
+    font-size: 1.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.auth-header p {
+    color: #a09880;
+    font-size: 0.9rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    color: #c9a44c;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input {
+    width: 100%;
+}
+
+.form-group-inline {
+    margin-bottom: 1.5rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #a09880;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    accent-color: #c9a44c;
+}
+
+.btn-full {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.05rem;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(201, 164, 76, 0.2);
+}
+
+.auth-footer p {
+    color: #a09880;
+    font-size: 0.9rem;
+}
+
+.auth-footer a {
+    color: #c9a44c;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.validation-errors {
+    background: rgba(231, 76, 60, 0.15);
+    border: 1px solid rgba(231, 76, 60, 0.4);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    color: #e74c3c;
+    font-size: 0.85rem;
+}
+
+.validation-errors ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.validation-errors li {
+    padding: 0.15rem 0;
+}

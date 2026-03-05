@@ -1,0 +1,144 @@
+@page "/history"
+@attribute [Authorize]
+@using Blackjack.Domain.Models
+@using Blackjack.Infrastructure.Data
+@using Blackjack.Infrastructure.Repositories
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IGameHistoryRepository GameHistoryRepository
+@inject AuthenticationStateProvider AuthStateProvider
+@rendermode RenderMode.InteractiveServer
+
+<PageTitle>History - Blackjack</PageTitle>
+
+<div class="history-page">
+    <h1>📜 Game History</h1>
+
+    @if (isLoading)
+    {
+        <p class="text-gold">Loading history...</p>
+    }
+    else if (games.Count == 0)
+    {
+        <div class="panel text-center mt-2">
+            <p>No games played yet.</p>
+            <a href="/" class="btn btn-primary mt-2">Start Playing</a>
+        </div>
+    }
+    else
+    {
+        <div class="panel mt-2">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Bet</th>
+                        <th>Player</th>
+                        <th>Dealer</th>
+                        <th>Result</th>
+                        <th>Payout</th>
+                        <th>Net</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var game in games)
+                    {
+                        var net = game.FinalPayout - game.InitialBet;
+                        <tr>
+                            <td>@game.EndedAt.ToString("MMM dd, HH:mm")</td>
+                            <td>$@game.InitialBet.ToString("N0")</td>
+                            <td>@game.PlayerHandSummary</td>
+                            <td>@game.DealerHandSummary</td>
+                            <td class="@GetResultClass(game.Result)">@GetResultDisplay(game.Result)</td>
+                            <td>$@game.FinalPayout.ToString("N0")</td>
+                            <td class="@(net >= 0 ? "text-green" : "text-red")">
+                                @(net >= 0 ? "+" : "")$@net.ToString("N0")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @* Pagination *@
+            @if (totalPages > 1)
+            {
+                <div class="pagination mt-2">
+                    <button class="btn btn-primary" disabled="@(currentPage <= 1)" @onclick="PreviousPage">
+                        ← Previous
+                    </button>
+                    <span class="page-info">Page @currentPage of @totalPages</span>
+                    <button class="btn btn-primary" disabled="@(currentPage >= totalPages)" @onclick="NextPage">
+                        Next →
+                    </button>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private List<GameRecord> games = new();
+    private int currentPage = 1;
+    private int totalPages;
+    private int totalCount;
+    private const int PageSize = 15;
+    private string? userId;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            userId = authState.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            await LoadPage();
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadPage()
+    {
+        if (userId == null) return;
+        var (records, count) = await GameHistoryRepository.GetHistoryAsync(userId, currentPage, PageSize);
+        games = records;
+        totalCount = count;
+        totalPages = (int)Math.Ceiling((double)totalCount / PageSize);
+    }
+
+    private async Task PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            await LoadPage();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            await LoadPage();
+        }
+    }
+
+    private static string GetResultClass(GameResult result) => result switch
+    {
+        GameResult.Win => "text-green",
+        GameResult.Blackjack => "text-gold",
+        GameResult.Push => "",
+        GameResult.Lose => "text-red",
+        _ => ""
+    };
+
+    private static string GetResultDisplay(GameResult result) => result switch
+    {
+        GameResult.Win => "Win",
+        GameResult.Blackjack => "Blackjack!",
+        GameResult.Push => "Push",
+        GameResult.Lose => "Loss",
+        _ => result.ToString()
+    };
+}

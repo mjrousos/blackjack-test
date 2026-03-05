@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap');
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    font-family: 'Lato', sans-serif;
+    background: #1a472a;
+    color: #e8e0d0;
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+    color: #c9a44c;
+}
+
+/* Felt texture overlay */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.6rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-primary {
+    background: linear-gradient(to bottom, #c9a44c, #a07830);
+    color: #1a0f0a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(to bottom, #dbb85c, #b88840);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-danger {
+    background: linear-gradient(to bottom, #c0392b, #962d22);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(to bottom, #e74c3c, #c0392b);
+}
+
+.btn-success {
+    background: linear-gradient(to bottom, #27ae60, #1e8449);
+    color: white;
+}
+
+.btn-success:hover {
+    background: linear-gradient(to bottom, #2ecc71, #27ae60);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Cards panel */
+.panel {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(201, 164, 76, 0.3);
+    border-radius: 10px;
+    padding: 1.5rem;
+    backdrop-filter: blur(5px);
+}
+
+/* Form inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"] {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(201, 164, 76, 0.4);
+    color: #e8e0d0;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    width: 100%;
+    transition: border-color 0.2s;
+}
+
+input:focus {
+    outline: none;
+    border-color: #c9a44c;
+    box-shadow: 0 0 5px rgba(201, 164, 76, 0.3);
+}
+
+/* Validation messages */
+.validation-message {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: rgba(201, 164, 76, 0.2);
+    color: #c9a44c;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(201, 164, 76, 0.3);
+}
+
+td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+tr:hover {
+    background: rgba(201, 164, 76, 0.05);
+}
+
+/* Utility */
+.text-gold { color: #c9a44c; }
+.text-green { color: #2ecc71; }
+.text-red { color: #e74c3c; }
+.text-center { text-align: center; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.gap-1 { gap: 0.5rem; }
+.gap-2 { gap: 1rem; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.flex-wrap { flex-wrap: wrap; }
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(201, 164, 76, 0.5);
+    border-radius: 4px;
+}
