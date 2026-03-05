@@ -1,4 +1,4 @@
-.dashboard, .history-page {
+.dashboard, .history-page, .how-to-play {
     max-width: 900px;
     margin: 0 auto;
 }
@@ -90,4 +90,20 @@
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+
+/* How to Play */
+.rules-list {
+    padding-left: 1.5rem;
+    color: #e8e0d0;
+    line-height: 1.8;
+}
+
+.rules-list li {
+    margin-bottom: 0.25rem;
+}
+
+.how-to-play p {
+    color: #e8e0d0;
+    line-height: 1.7;
 }
