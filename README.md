@@ -37,7 +37,7 @@ A browser-based, single-player Blackjack game built with .NET 10 and Blazor Serv
 ### Project Layout
 
 ```
-Blackjack-v2/
+Blackjack/
 ├── src/
 │   ├── Blackjack.Domain/          # Core game logic — no external dependencies
 │   │   ├── Models/                # Card, Hand, Shoe, GameState, GameSettings, …
@@ -59,7 +59,7 @@ Blackjack-v2/
 │   └── Blackjack.E2E.Tests/       # Playwright end-to-end tests (requires Docker)
 ├── Dockerfile
 ├── docker-compose.yml
-└── Blackjack-v2.slnx
+└── Blackjack.slnx
 ```
 
 ### Layer Overview
@@ -98,8 +98,8 @@ This is the simplest way to run the full stack. Docker Compose starts both a SQL
 
 ```bash
 # Clone the repo
-git clone https://github.com/mjrousos/Blackjack-v2.git
-cd Blackjack-v2
+git clone https://github.com/mjrousos/Blackjack.git
+cd Blackjack
 
 # Build and start all services
 docker compose up --build
@@ -141,7 +141,7 @@ You need a SQL Server instance (local or remote) and the .NET 10 SDK.
 3. **Build and run:**
 
    ```bash
-   dotnet build Blackjack-v2.slnx
+   dotnet build Blackjack.slnx
    dotnet run --project src/Blackjack.Web
    ```
 
@@ -155,7 +155,7 @@ Unit and integration tests do not require Docker or a running database:
 
 ```bash
 # Run all non-E2E tests
-dotnet test Blackjack-v2.slnx --filter "Category!=E2E"
+dotnet test Blackjack.slnx --filter "Category!=E2E"
 ```
 
 End-to-end tests use Playwright and require a running application:
