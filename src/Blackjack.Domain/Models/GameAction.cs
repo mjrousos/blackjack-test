@@ -5,5 +5,7 @@ public enum GameAction
     Hit,
     Stand,
     DoubleDown,
-    Split
+    Split,
+    TakeInsurance,
+    DeclineInsurance
 }

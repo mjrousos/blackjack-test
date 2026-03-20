@@ -16,6 +16,7 @@ public interface IGameService
     GameResult? Result { get; }
     List<GameResult?> SplitResults { get; }
     bool IsDealerCardHidden { get; }
+    decimal InsuranceBet { get; }
 
     void PlaceBet(decimal amount);
     void Deal();
@@ -23,6 +24,8 @@ public interface IGameService
     void Stand();
     void DoubleDown();
     void Split();
+    void TakeInsurance();
+    void DeclineInsurance();
     void ResolveDealerTurn();
     List<GameAction> GetAvailableActions();
     decimal CalculatePayout();

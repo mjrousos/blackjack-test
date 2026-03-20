@@ -109,9 +109,15 @@
     }
 
     @* Action Buttons *@
-    @if (GameService.State == GameState.PlayerTurn)
+    @if (GameService.State == GameState.PlayerTurn || GameService.State == GameState.InsuranceOffered)
     {
         <div class="action-buttons">
+            @if (GameService.State == GameState.InsuranceOffered)
+            {
+                <div class="insurance-prompt">
+                    <p>🛡️ Dealer shows Ace — Buy Insurance for $@((GameService.CurrentBet / 2).ToString("N0"))?</p>
+                </div>
+            }
             @foreach (var action in GameService.AvailableActions)
             {
                 <button class="btn @GetActionButtonClass(action)" @onclick="() => PerformAction(action)">
@@ -239,6 +245,12 @@
                 case GameAction.Split:
                     GameService.Split();
                     break;
+                case GameAction.TakeInsurance:
+                    GameService.TakeInsurance();
+                    break;
+                case GameAction.DeclineInsurance:
+                    GameService.DeclineInsurance();
+                    break;
             }
 
             if (GameService.State == GameState.Resolved)
@@ -290,6 +302,8 @@
         GameAction.Stand => "btn-danger",
         GameAction.DoubleDown => "btn-success",
         GameAction.Split => "btn-primary",
+        GameAction.TakeInsurance => "btn-success",
+        GameAction.DeclineInsurance => "btn-outline",
         _ => "btn-primary"
     };
 
@@ -299,6 +313,8 @@
         GameAction.Stand => "🛑 Stand",
         GameAction.DoubleDown => "⬆️ Double Down",
         GameAction.Split => "✌️ Split",
+        GameAction.TakeInsurance => "🛡️ Take Insurance",
+        GameAction.DeclineInsurance => "❌ No Insurance",
         _ => action.ToString()
     };
 }

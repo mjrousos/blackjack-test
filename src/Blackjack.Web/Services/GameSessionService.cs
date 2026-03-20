@@ -32,6 +32,7 @@ public class GameSessionService
     public GameResult? Result => _game.Result;
     public List<GameResult?> SplitResults => _game.SplitResults;
     public bool IsDealerCardHidden => _game.IsDealerCardHidden;
+    public decimal InsuranceBet => _game.InsuranceBet;
     public List<GameAction> AvailableActions => _game.GetAvailableActions();
     public decimal LastPayout { get; private set; }
 
@@ -81,6 +82,10 @@ public class GameSessionService
             _game.ResolveDealerTurn();
         }
     }
+
+    public void TakeInsurance() => _game.TakeInsurance();
+
+    public void DeclineInsurance() => _game.DeclineInsurance();
 
     public void CheckAndResolveDealerTurn()
     {
