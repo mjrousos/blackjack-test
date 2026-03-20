@@ -27,6 +27,14 @@ public class GameHistoryRepository(BlackjackDbContext dbContext) : IGameHistoryR
         return (records, totalCount);
     }
 
+    public async Task<List<GameRecord>> GetAllHistoryAsync(string userId)
+    {
+        return await dbContext.GameRecords
+            .Where(g => g.UserId == userId)
+            .OrderByDescending(g => g.StartedAt)
+            .ToListAsync();
+    }
+
     public async Task<PlayerStatistics> GetStatisticsAsync(string userId)
     {
         var games = dbContext.GameRecords.Where(g => g.UserId == userId);

@@ -142,6 +142,61 @@ public class GameHistoryRepositoryTests
     }
 
     [Fact]
+    public async Task GetAllHistoryAsync_ReturnsAllRecordsOrderedByDateDesc()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        await using var context = await CreateContextWithUser(dbName);
+        var baseDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        for (int i = 0; i < 20; i++)
+        {
+            context.GameRecords.Add(CreateGameRecord("user1", GameResult.Win, 100m, 200m, baseDate.AddDays(i)));
+        }
+        await context.SaveChangesAsync();
+        var repo = new GameHistoryRepository(context);
+
+        var records = await repo.GetAllHistoryAsync("user1");
+
+        Assert.Equal(20, records.Count);
+        for (int i = 0; i < records.Count - 1; i++)
+        {
+            Assert.True(records[i].StartedAt >= records[i + 1].StartedAt);
+        }
+    }
+
+    [Fact]
+    public async Task GetAllHistoryAsync_ReturnsEmptyListForUserWithNoGames()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        await using var context = await CreateContextWithUser(dbName);
+        var repo = new GameHistoryRepository(context);
+
+        var records = await repo.GetAllHistoryAsync("user1");
+
+        Assert.Empty(records);
+    }
+
+    [Fact]
+    public async Task GetAllHistoryAsync_ReturnsOnlyRecordsForSpecifiedUser()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        await using var context = CreateContext(dbName);
+        context.Users.Add(new ApplicationUser { Id = "user1", UserName = "a@a.com", Email = "a@a.com", Balance = 1000m });
+        context.Users.Add(new ApplicationUser { Id = "user2", UserName = "b@b.com", Email = "b@b.com", Balance = 1000m });
+        await context.SaveChangesAsync();
+        var baseDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        context.GameRecords.Add(CreateGameRecord("user1", GameResult.Win, 100m, 200m, baseDate));
+        context.GameRecords.Add(CreateGameRecord("user1", GameResult.Lose, 50m, 0m, baseDate.AddDays(1)));
+        context.GameRecords.Add(CreateGameRecord("user2", GameResult.Win, 75m, 150m, baseDate.AddDays(2)));
+        await context.SaveChangesAsync();
+        var repo = new GameHistoryRepository(context);
+
+        var records = await repo.GetAllHistoryAsync("user1");
+
+        Assert.Equal(2, records.Count);
+        Assert.All(records, r => Assert.Equal("user1", r.UserId));
+    }
+
+    [Fact]
     public async Task GetStatisticsAsync_ReturnsZeroStatsForUserWithNoGames()
     {
         var dbName = Guid.NewGuid().ToString();
