@@ -18,7 +18,7 @@
 
 .balance-title {
     font-size: 0.8rem;
-    color: #a09880;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -26,7 +26,7 @@
 .balance-amount-large {
     font-size: 2rem;
     font-weight: bold;
-    color: #c9a44c;
+    color: var(--accent);
     font-family: 'Playfair Display', serif;
 }
 
@@ -46,14 +46,14 @@
     display: block;
     font-size: 1.5rem;
     font-weight: bold;
-    color: #e8e0d0;
+    color: var(--text-primary);
     font-family: 'Playfair Display', serif;
 }
 
 .stat-label {
     display: block;
     font-size: 0.75rem;
-    color: #a09880;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 0.25rem;
@@ -68,7 +68,7 @@
 }
 
 .page-info {
-    color: #a09880;
+    color: var(--text-muted);
     font-size: 0.9rem;
 }
 
@@ -95,7 +95,7 @@
 /* How to Play */
 .rules-list {
     padding-left: 1.5rem;
-    color: #e8e0d0;
+    color: var(--text-primary);
     line-height: 1.8;
 }
 
@@ -104,6 +104,6 @@
 }
 
 .how-to-play p {
-    color: #e8e0d0;
+    color: var(--text-primary);
     line-height: 1.7;
 }

@@ -1,0 +1,50 @@
+@inject IJSRuntime JS
+
+<div class="theme-selector">
+    <button class="theme-toggle" @onclick="ToggleDropdown" title="Change theme">
+        🎨
+    </button>
+    @if (isOpen)
+    {
+        <div class="theme-dropdown">
+            <button class="theme-option @(currentTheme == "" ? "active" : "")"
+                    @onclick='() => SelectTheme("")'>
+                <span class="theme-swatch swatch-classic"></span>
+                Classic Casino
+            </button>
+            <button class="theme-option @(currentTheme == "midnight-blue" ? "active" : "")"
+                    @onclick='() => SelectTheme("midnight-blue")'>
+                <span class="theme-swatch swatch-midnight"></span>
+                Midnight Blue
+            </button>
+            <button class="theme-option @(currentTheme == "royal-purple" ? "active" : "")"
+                    @onclick='() => SelectTheme("royal-purple")'>
+                <span class="theme-swatch swatch-purple"></span>
+                Royal Purple
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private bool isOpen;
+    private string currentTheme = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            currentTheme = await JS.InvokeAsync<string>("getTheme") ?? "";
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleDropdown() => isOpen = !isOpen;
+
+    private async Task SelectTheme(string theme)
+    {
+        currentTheme = theme;
+        isOpen = false;
+        await JS.InvokeVoidAsync("setTheme", theme);
+    }
+}

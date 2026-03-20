@@ -62,9 +62,9 @@
 .card-back {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #1a3a6b, #2c5aa0);
+    background: linear-gradient(135deg, var(--card-back-start), var(--card-back-end));
     border-radius: 8px;
-    border: 2px solid #c9a44c;
+    border: 2px solid var(--accent);
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
@@ -75,14 +75,14 @@
 .card-back-pattern {
     width: 60px;
     height: 88px;
-    border: 2px solid rgba(201, 164, 76, 0.5);
+    border: 2px solid rgba(var(--accent-rgb), 0.5);
     border-radius: 4px;
     background: repeating-linear-gradient(
         45deg,
         transparent,
         transparent 5px,
-        rgba(201, 164, 76, 0.15) 5px,
-        rgba(201, 164, 76, 0.15) 10px
+        rgba(var(--accent-rgb), 0.15) 5px,
+        rgba(var(--accent-rgb), 0.15) 10px
     );
 }
 
@@ -95,9 +95,9 @@
 }
 
 .card-hand.hand-active {
-    box-shadow: 0 0 12px rgba(201, 164, 76, 0.6), 0 0 24px rgba(201, 164, 76, 0.3);
-    border: 1px solid rgba(201, 164, 76, 0.4);
-    background: rgba(201, 164, 76, 0.05);
+    box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.6), 0 0 24px rgba(var(--accent-rgb), 0.3);
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
+    background: rgba(var(--accent-rgb), 0.05);
 }
 
 .card-hand.hand-inactive {
@@ -120,7 +120,7 @@
 }
 
 .hand-title {
-    color: #c9a44c;
+    color: var(--accent);
     font-size: 1rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -128,8 +128,8 @@
 }
 
 .hand-score {
-    background: rgba(0, 0, 0, 0.5);
-    color: #e8e0d0;
+    background: rgba(var(--overlay-rgb), 0.5);
+    color: var(--text-primary);
     padding: 0.2rem 0.6rem;
     border-radius: 12px;
     font-size: 0.9rem;
@@ -142,8 +142,8 @@
 }
 
 .hand-score.blackjack {
-    background: rgba(201, 164, 76, 0.8);
-    color: #1a0f0a;
+    background: rgba(var(--accent-rgb), 0.8);
+    color: var(--btn-primary-text);
     animation: pulse 1s infinite;
 }
 
@@ -183,7 +183,7 @@
 .chip-red { background: #c0392b; color: white; }
 .chip-green { background: #27ae60; color: white; }
 .chip-black { background: #2c3e50; color: white; }
-.chip-gold { background: #c9a44c; color: #1a0f0a; }
+.chip-gold { background: var(--accent); color: var(--btn-primary-text); }
 
 /* Result Overlay */
 .result-overlay {
@@ -217,7 +217,7 @@
 }
 
 .result-win { border-color: #2ecc71; }
-.result-blackjack { border-color: #c9a44c; }
+.result-blackjack { border-color: var(--accent); }
 .result-push { border-color: #95a5a6; }
 .result-lose { border-color: #e74c3c; }
 
@@ -233,13 +233,13 @@
 }
 
 .result-win .result-title { color: #2ecc71; }
-.result-blackjack .result-title { color: #c9a44c; }
+.result-blackjack .result-title { color: var(--accent); }
 .result-push .result-title { color: #95a5a6; }
 .result-lose .result-title { color: #e74c3c; }
 
 .result-payout {
     font-size: 1.3rem;
-    color: #e8e0d0;
+    color: var(--text-primary);
     font-weight: bold;
 }
 
@@ -264,7 +264,7 @@
 }
 
 .split-hand-result.result-win { border-color: #2ecc71; }
-.split-hand-result.result-blackjack { border-color: #c9a44c; }
+.split-hand-result.result-blackjack { border-color: var(--accent); }
 .split-hand-result.result-push { border-color: #95a5a6; }
 .split-hand-result.result-lose { border-color: #e74c3c; }
 
@@ -272,7 +272,7 @@
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #c9a44c;
+    color: var(--accent);
     font-weight: 600;
 }
 
@@ -283,27 +283,27 @@
 .split-hand-title {
     font-size: 0.95rem;
     font-weight: 600;
-    color: #e8e0d0;
+    color: var(--text-primary);
 }
 
 .split-hand-payout {
     font-size: 0.85rem;
     font-weight: bold;
-    color: #e8e0d0;
+    color: var(--text-primary);
 }
 
 .split-hand-result.result-win .split-hand-title { color: #2ecc71; }
-.split-hand-result.result-blackjack .split-hand-title { color: #c9a44c; }
+.split-hand-result.result-blackjack .split-hand-title { color: var(--accent); }
 .split-hand-result.result-push .split-hand-title { color: #95a5a6; }
 .split-hand-result.result-lose .split-hand-title { color: #e74c3c; }
 
-.result-mixed { border-color: #c9a44c; }
-.result-mixed .result-title { color: #c9a44c; }
+.result-mixed { border-color: var(--accent); }
+.result-mixed .result-title { color: var(--accent); }
 
 .total-payout {
     margin-top: 0.5rem;
     padding-top: 0.75rem;
-    border-top: 1px solid rgba(232, 224, 208, 0.2);
+    border-top: 1px solid rgba(var(--accent-rgb), 0.15);
 }
 
 /* Deal Animation */
@@ -329,8 +329,8 @@
 }
 
 @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 5px rgba(201, 164, 76, 0.5); }
-    50% { box-shadow: 0 0 15px rgba(201, 164, 76, 0.8); }
+    0%, 100% { box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.5); }
+    50% { box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.8); }
 }
 
 /* Responsive */

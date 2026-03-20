@@ -10,6 +10,13 @@
     <title>Access Denied - Blackjack</title>
     <link rel="stylesheet" href="/css/site.css" />
     <link rel="stylesheet" href="/css/auth.css" />
+    <link rel="stylesheet" href="/css/themes.css" />
+    <script>
+        (function() {
+            var theme = localStorage.getItem('blackjack-theme');
+            if (theme) document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 <body>
     <div class="auth-page">
