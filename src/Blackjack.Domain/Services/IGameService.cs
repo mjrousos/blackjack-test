@@ -23,6 +23,7 @@ public interface IGameService
     void Stand();
     void DoubleDown();
     void Split();
+    void Surrender();
     void ResolveDealerTurn();
     List<GameAction> GetAvailableActions();
     decimal CalculatePayout();

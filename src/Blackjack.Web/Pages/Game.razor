@@ -239,6 +239,9 @@
                 case GameAction.Split:
                     GameService.Split();
                     break;
+                case GameAction.Surrender:
+                    GameService.Surrender();
+                    break;
             }
 
             if (GameService.State == GameState.Resolved)
@@ -290,6 +293,7 @@
         GameAction.Stand => "btn-danger",
         GameAction.DoubleDown => "btn-success",
         GameAction.Split => "btn-primary",
+        GameAction.Surrender => "btn-warning",
         _ => "btn-primary"
     };
 
@@ -299,6 +303,7 @@
         GameAction.Stand => "🛑 Stand",
         GameAction.DoubleDown => "⬆️ Double Down",
         GameAction.Split => "✌️ Split",
+        GameAction.Surrender => "🏳️ Surrender",
         _ => action.ToString()
     };
 }

@@ -82,6 +82,8 @@ public class GameSessionService
         }
     }
 
+    public void Surrender() => _game.Surrender();
+
     public void CheckAndResolveDealerTurn()
     {
         if (_game.State == GameState.DealerTurn)

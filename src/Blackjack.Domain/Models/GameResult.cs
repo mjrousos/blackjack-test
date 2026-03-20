@@ -5,5 +5,6 @@ public enum GameResult
     Win,
     Lose,
     Push,
-    Blackjack
+    Blackjack,
+    Surrender
 }

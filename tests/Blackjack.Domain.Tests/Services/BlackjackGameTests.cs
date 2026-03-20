@@ -103,6 +103,14 @@ public class BlackjackGameTests
         }
 
         [Fact]
+        public void CannotSurrender_InWrongState()
+        {
+            var game = CreateGame();
+            var act = () => game.Surrender();
+            act.Should().Throw<InvalidOperationException>();
+        }
+
+        [Fact]
         public void CannotResolveDealerTurn_InWrongState()
         {
             var game = CreateGame();
@@ -669,6 +677,14 @@ public class BlackjackGameTests
             var game = FindGameWithResult(GameResult.Lose, 10m);
             game.CalculatePayout().Should().Be(0m);
         }
+
+        [Fact]
+        public void Surrender_ReturnsHalfBet()
+        {
+            var game = CreateGameInPlayerTurn(bet: 10m);
+            game.Surrender();
+            game.CalculatePayout().Should().Be(5m);
+        }
     }
 
     public class GetAvailableActionsTests
@@ -724,6 +740,57 @@ public class BlackjackGameTests
             var actions = game.GetAvailableActions();
             actions.Should().NotContain(GameAction.DoubleDown);
         }
+
+        [Fact]
+        public void IncludesSurrender_OnInitialTwoCardHand()
+        {
+            var game = CreateGameInPlayerTurn();
+            var actions = game.GetAvailableActions();
+            actions.Should().Contain(GameAction.Surrender);
+        }
+
+        [Fact]
+        public void ExcludesSurrender_AfterHit()
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(10);
+                game.Deal();
+                if (game.State != GameState.PlayerTurn) continue;
+
+                game.Hit();
+                if (game.State == GameState.PlayerTurn)
+                {
+                    game.GetAvailableActions().Should().NotContain(GameAction.Surrender);
+                    return;
+                }
+            }
+            throw new InvalidOperationException("Could not find a seed for test scenario.");
+        }
+
+        [Fact]
+        public void ExcludesSurrender_AfterSplit()
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(10);
+                game.Deal();
+                if (game.State == GameState.PlayerTurn &&
+                    game.PlayerHand.CanSplit &&
+                    game.PlayerHand.Cards[0].Rank != Rank.Ace)
+                {
+                    game.Split();
+                    if (game.State == GameState.PlayerTurn)
+                    {
+                        game.GetAvailableActions().Should().NotContain(GameAction.Surrender);
+                        return;
+                    }
+                }
+            }
+            throw new InvalidOperationException("Could not find a seed for test scenario.");
+        }
     }
 
     public class BalanceTests
@@ -752,6 +819,132 @@ public class BlackjackGameTests
             var game = CreateGame();
             game.SetBalance(500);
             game.PlayerBalance.Should().Be(500);
+        }
+    }
+
+    public class SurrenderTests
+    {
+        [Fact]
+        public void Surrender_TransitionsToResolvedState()
+        {
+            var game = CreateGameInPlayerTurn();
+            game.Surrender();
+            game.State.Should().Be(GameState.Resolved);
+        }
+
+        [Fact]
+        public void Surrender_SetsResultToSurrender()
+        {
+            var game = CreateGameInPlayerTurn();
+            game.Surrender();
+            game.Result.Should().Be(GameResult.Surrender);
+        }
+
+        [Fact]
+        public void Surrender_ReturnsHalfBetToBalance()
+        {
+            var game = CreateGameInPlayerTurn(bet: 10m);
+            var balanceBeforeSurrender = game.PlayerBalance;
+            game.Surrender();
+            game.PlayerBalance.Should().Be(balanceBeforeSurrender + 5m);
+        }
+
+        [Fact]
+        public void Surrender_CalculatePayout_ReturnsHalfBet()
+        {
+            var game = CreateGameInPlayerTurn(bet: 10m);
+            game.Surrender();
+            game.CalculatePayout().Should().Be(5m);
+        }
+
+        [Fact]
+        public void Surrender_RevealsDealerCard()
+        {
+            var game = CreateGameInPlayerTurn();
+            game.IsDealerCardHidden.Should().BeTrue();
+            game.Surrender();
+            game.IsDealerCardHidden.Should().BeFalse();
+        }
+
+        [Fact]
+        public void Surrender_AfterHit_Throws()
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(10);
+                game.Deal();
+                if (game.State != GameState.PlayerTurn) continue;
+
+                game.Hit();
+                if (game.State == GameState.PlayerTurn)
+                {
+                    var act = () => game.Surrender();
+                    act.Should().Throw<InvalidOperationException>();
+                    return;
+                }
+            }
+            throw new InvalidOperationException("Could not find a seed for test scenario.");
+        }
+
+        [Fact]
+        public void Surrender_AfterSplit_Throws()
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(10);
+                game.Deal();
+                if (game.State == GameState.PlayerTurn &&
+                    game.PlayerHand.CanSplit &&
+                    game.PlayerHand.Cards[0].Rank != Rank.Ace)
+                {
+                    game.Split();
+                    if (game.State == GameState.PlayerTurn)
+                    {
+                        var act = () => game.Surrender();
+                        act.Should().Throw<InvalidOperationException>();
+                        return;
+                    }
+                }
+            }
+            throw new InvalidOperationException("Could not find a seed for test scenario.");
+        }
+
+        [Fact]
+        public void Surrender_InWrongState_Throws()
+        {
+            var game = CreateGame();
+            var act = () => game.Surrender();
+            act.Should().Throw<InvalidOperationException>();
+        }
+
+        [Fact]
+        public void Surrender_NotAvailableWhenDealerHasBlackjack()
+        {
+            // When dealer has blackjack, game resolves immediately in Deal() without entering PlayerTurn
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(10);
+                game.Deal();
+                if (game.State == GameState.Resolved && game.DealerHand.IsBlackjack)
+                {
+                    // Game is already Resolved; Surrender is not an available action
+                    game.GetAvailableActions().Should().NotContain(GameAction.Surrender);
+                    return;
+                }
+            }
+            throw new InvalidOperationException("Could not find a seed for dealer blackjack.");
+        }
+
+        [Fact]
+        public void Surrender_SplitResultsContainsSurrenderResult()
+        {
+            var game = CreateGameInPlayerTurn();
+            game.Surrender();
+            game.SplitResults.Should().HaveCount(1);
+            game.SplitResults[0].Should().Be(GameResult.Surrender);
         }
     }
 
