@@ -1,0 +1,19 @@
+@using Blackjack.Domain.Models
+
+<div class="achievement-badge @(Earned ? "earned" : "locked")">
+    <span class="achievement-icon">@(Earned ? Achievement.Icon : "🔒")</span>
+    <div class="achievement-info">
+        <span class="achievement-name">@Achievement.Name</span>
+        <span class="achievement-desc">@Achievement.Description</span>
+        @if (Earned && EarnedAt.HasValue)
+        {
+            <span class="achievement-date">Earned @EarnedAt.Value.ToString("MMM dd, yyyy")</span>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Achievement Achievement { get; set; } = default!;
+    [Parameter] public bool Earned { get; set; }
+    [Parameter] public DateTime? EarnedAt { get; set; }
+}

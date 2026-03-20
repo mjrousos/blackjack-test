@@ -10,14 +10,16 @@ public class GameSessionService
 {
     private readonly IPlayerRepository _playerRepository;
     private readonly IGameHistoryRepository _gameHistoryRepository;
+    private readonly IAchievementRepository _achievementRepository;
     private BlackjackGame _game;
     private string? _userId;
     private DateTime _roundStartTime;
 
-    public GameSessionService(IPlayerRepository playerRepository, IGameHistoryRepository gameHistoryRepository)
+    public GameSessionService(IPlayerRepository playerRepository, IGameHistoryRepository gameHistoryRepository, IAchievementRepository achievementRepository)
     {
         _playerRepository = playerRepository;
         _gameHistoryRepository = gameHistoryRepository;
+        _achievementRepository = achievementRepository;
         _game = new BlackjackGame(new GameSettings());
     }
 
@@ -34,6 +36,7 @@ public class GameSessionService
     public bool IsDealerCardHidden => _game.IsDealerCardHidden;
     public List<GameAction> AvailableActions => _game.GetAvailableActions();
     public decimal LastPayout { get; private set; }
+    public IReadOnlyList<string> NewlyEarnedAchievements { get; private set; } = [];
 
     public async Task InitializeAsync(ClaimsPrincipal user)
     {
@@ -112,12 +115,15 @@ public class GameSessionService
             DealerScore = _game.DealerHand.Score
         };
         await _gameHistoryRepository.SaveGameRecordAsync(record);
+
+        NewlyEarnedAchievements = await _achievementRepository.CheckAndAwardNewAchievementsAsync(_userId);
     }
 
     public void StartNewRound()
     {
         _game.StartNewRound();
         LastPayout = 0;
+        NewlyEarnedAchievements = [];
     }
 
     public async Task RefillBalanceAsync()

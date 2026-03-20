@@ -1,12 +1,14 @@
 @page "/dashboard"
 @attribute [Authorize]
 @using Blackjack.Domain.Models
+@using Blackjack.Domain.Services
 @using Blackjack.Infrastructure.Data
 @using Blackjack.Infrastructure.Repositories
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IPlayerRepository PlayerRepository
 @inject IGameHistoryRepository GameHistoryRepository
+@inject IAchievementRepository AchievementRepository
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 @rendermode RenderMode.InteractiveServer
@@ -77,6 +79,20 @@
             </div>
         </div>
 
+        @* Achievements *@
+        <div class="panel mt-2">
+            <h2 class="mb-1">🏅 Achievements (@earnedAchievementIds.Count / @AchievementEvaluator.AllAchievements.Count)</h2>
+            <div class="achievements-grid">
+                @foreach (var achievement in AchievementEvaluator.AllAchievements)
+                {
+                    var isEarned = earnedAchievementIds.ContainsKey(achievement.Id);
+                    <AchievementBadge Achievement="achievement"
+                                      Earned="isEarned"
+                                      EarnedAt="isEarned ? earnedAchievementIds[achievement.Id] : null" />
+                }
+            </div>
+        </div>
+
         @* Recent Games *@
         <div class="panel mt-2">
             <div class="flex justify-between items-center mb-1">
@@ -122,6 +138,7 @@
     private decimal balance;
     private PlayerStatistics stats = new();
     private List<GameRecord> recentGames = new();
+    private Dictionary<string, DateTime> earnedAchievementIds = new();
     private string? userId;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -136,6 +153,7 @@
                 stats = await GameHistoryRepository.GetStatisticsAsync(userId);
                 var (records, _) = await GameHistoryRepository.GetHistoryAsync(userId, 1, 5);
                 recentGames = records;
+                earnedAchievementIds = await AchievementRepository.GetEarnedAchievementsWithDatesAsync(userId);
             }
             isLoading = false;
             StateHasChanged();

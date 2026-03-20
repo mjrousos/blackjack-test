@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 public class BlackjackDbContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<GameRecord> GameRecords => Set<GameRecord>();
+    public DbSet<UserAchievement> UserAchievements => Set<UserAchievement>();
 
     public BlackjackDbContext(DbContextOptions<BlackjackDbContext> options) : base(options) { }
 
@@ -28,6 +29,15 @@ public class BlackjackDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(g => g.InitialBet).HasPrecision(18, 2);
             entity.Property(g => g.FinalPayout).HasPrecision(18, 2);
             entity.Property(g => g.Result).HasConversion<string>();
+        });
+
+        builder.Entity<UserAchievement>(entity =>
+        {
+            entity.HasIndex(a => new { a.UserId, a.AchievementId }).IsUnique();
+            entity.HasOne(a => a.User)
+                  .WithMany()
+                  .HasForeignKey(a => a.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

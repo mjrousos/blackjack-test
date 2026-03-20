@@ -17,6 +17,7 @@ public static class DependencyInjection
 
         services.AddScoped<IPlayerRepository, PlayerRepository>();
         services.AddScoped<IGameHistoryRepository, GameHistoryRepository>();
+        services.AddScoped<IAchievementRepository, AchievementRepository>();
 
         return services;
     }
