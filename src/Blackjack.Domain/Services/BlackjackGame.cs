@@ -199,6 +199,27 @@ public class BlackjackGame : IGameService
         }
     }
 
+    public void Surrender()
+    {
+        if (State != GameState.PlayerTurn)
+            throw new InvalidOperationException($"Cannot surrender in {State} state.");
+
+        var activeHand = GetActiveHand();
+
+        if (activeHand.Cards.Count != 2)
+            throw new InvalidOperationException("Can only surrender on the initial two-card hand.");
+
+        if (SplitHands.Count > 0)
+            throw new InvalidOperationException("Cannot surrender after splitting.");
+
+        IsDealerCardHidden = false;
+        Result = GameResult.Surrender;
+        SplitResults.Clear();
+        SplitResults.Add(GameResult.Surrender);
+        PlayerBalance += CalculatePayout();
+        State = GameState.Resolved;
+    }
+
     public void ResolveDealerTurn()
     {
         if (State != GameState.DealerTurn)
@@ -230,6 +251,9 @@ public class BlackjackGame : IGameService
 
         if (activeHand.CanSplit && SplitHands.Count == 0 && SplitBets[0] <= PlayerBalance)
             actions.Add(GameAction.Split);
+
+        if (activeHand.Cards.Count == 2 && SplitHands.Count == 0)
+            actions.Add(GameAction.Surrender);
 
         return actions;
     }
@@ -378,6 +402,7 @@ public class BlackjackGame : IGameService
         GameResult.Win => bet * 2,
         GameResult.Blackjack => bet * 2.5m,
         GameResult.Push => bet,
+        GameResult.Surrender => bet / 2,
         GameResult.Lose => 0m,
         _ => 0m
     };

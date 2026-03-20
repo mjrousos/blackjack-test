@@ -52,6 +52,7 @@
         GameResult.Blackjack => "Blackjack!",
         GameResult.Push => "Push",
         GameResult.Lose => "Dealer Wins",
+        GameResult.Surrender => "Surrendered",
         _ => ""
     };
 
@@ -61,6 +62,7 @@
         {
             if (Result == GameResult.Lose) return $"-${Bet:F0}";
             if (Result == GameResult.Push) return "Bet returned";
+            if (Result == GameResult.Surrender) return $"-${Bet / 2:F0}";
             decimal profit = Payout - Bet;
             return $"+${profit:F0}";
         }
@@ -130,6 +132,7 @@
         GameResult.Blackjack => "result-blackjack",
         GameResult.Push => "result-push",
         GameResult.Lose => "result-lose",
+        GameResult.Surrender => "result-lose",
         _ => ""
     };
 
@@ -139,6 +142,7 @@
         GameResult.Blackjack => "🃏",
         GameResult.Push => "🤝",
         GameResult.Lose => "😞",
+        GameResult.Surrender => "🏳️",
         _ => ""
     };
 
@@ -148,6 +152,7 @@
         GameResult.Blackjack => "Blackjack!",
         GameResult.Push => "Push",
         GameResult.Lose => "Lose",
+        GameResult.Surrender => "Surrendered",
         _ => ""
     };
 
@@ -157,6 +162,7 @@
         if (result == GameResult.Push) return "$0";
         if (result == GameResult.Win) return $"+${bet:F0}";
         if (result == GameResult.Blackjack) return $"+${bet * 1.5m:F0}";
+        if (result == GameResult.Surrender) return $"-${bet / 2:F0}";
         return "";
     }
 }
