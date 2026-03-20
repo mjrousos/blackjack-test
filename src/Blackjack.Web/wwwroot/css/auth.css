@@ -7,8 +7,8 @@
 }
 
 .auth-card {
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(201, 164, 76, 0.4);
+    background: rgba(var(--overlay-rgb), 0.5);
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
     border-radius: 12px;
     padding: 2.5rem;
     width: 100%;
@@ -29,13 +29,13 @@
 
 .auth-header h1 {
     font-family: 'Playfair Display', serif;
-    color: #c9a44c;
+    color: var(--accent);
     font-size: 1.8rem;
     margin-bottom: 0.25rem;
 }
 
 .auth-header p {
-    color: #a09880;
+    color: var(--text-muted);
     font-size: 0.9rem;
 }
 
@@ -45,7 +45,7 @@
 
 .form-group label {
     display: block;
-    color: #c9a44c;
+    color: var(--accent);
     font-size: 0.85rem;
     font-weight: 600;
     margin-bottom: 0.4rem;
@@ -65,14 +65,14 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #a09880;
+    color: var(--text-muted);
     cursor: pointer;
     font-size: 0.9rem;
 }
 
 .checkbox-label input[type="checkbox"] {
     width: auto;
-    accent-color: #c9a44c;
+    accent-color: var(--accent);
 }
 
 .btn-full {
@@ -85,16 +85,16 @@
     text-align: center;
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid rgba(201, 164, 76, 0.2);
+    border-top: 1px solid rgba(var(--accent-rgb), 0.2);
 }
 
 .auth-footer p {
-    color: #a09880;
+    color: var(--text-muted);
     font-size: 0.9rem;
 }
 
 .auth-footer a {
-    color: #c9a44c;
+    color: var(--accent);
     text-decoration: none;
     font-weight: 600;
 }

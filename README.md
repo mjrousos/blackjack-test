@@ -29,6 +29,7 @@ A browser-based, single-player Blackjack game built with .NET 10 and Blazor Serv
 - Dashboard showing current balance and game statistics
 - Paginated game history with hand details and outcomes
 - Responsive, casino-themed design that works on desktop, tablet, and mobile
+- Customizable color themes: Classic Casino (green), Midnight Blue (navy), and Royal Purple
 
 ---
 
@@ -192,3 +193,17 @@ Default configuration (editable in `appsettings.json` under the `GameSettings` s
 | Maximum bet | $500 |
 | Starting balance | $1,000 |
 | Reshuffle threshold | 25% of shoe remaining |
+
+---
+
+## Themes
+
+The game includes three color themes that can be switched at any time using the 🎨 button in the top navigation bar:
+
+| Theme | Description |
+|---|---|
+| **Classic Casino** | Traditional green felt with gold accents (default) |
+| **Midnight Blue** | Deep navy background with ice-blue accents |
+| **Royal Purple** | Rich purple felt with rose-gold accents |
+
+Your theme preference is saved in the browser and persists across sessions, including on the login and registration pages. No account or server-side changes are needed — themes are applied entirely on the client side via CSS custom properties and `localStorage`.
