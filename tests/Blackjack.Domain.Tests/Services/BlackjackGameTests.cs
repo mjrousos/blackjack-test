@@ -37,6 +37,9 @@ public class BlackjackGameTests
             var game = new BlackjackGame(DefaultSettings, new Random(seed));
             game.PlaceBet(bet);
             game.Deal();
+            // Decline insurance when offered so we can reach the normal resolution path
+            if (game.State == GameState.InsuranceOffered)
+                game.DeclineInsurance();
             if (game.State == GameState.PlayerTurn)
             {
                 game.Stand();
@@ -209,6 +212,9 @@ public class BlackjackGameTests
                 var game = new BlackjackGame(DefaultSettings, new Random(seed));
                 game.PlaceBet(10);
                 game.Deal();
+                // Insurance may be offered when dealer shows Ace; decline to reach normal resolution
+                if (game.State == GameState.InsuranceOffered)
+                    game.DeclineInsurance();
                 if (game.Result == GameResult.Lose && game.DealerHand.IsBlackjack)
                 {
                     game.State.Should().Be(GameState.Resolved);
@@ -227,6 +233,9 @@ public class BlackjackGameTests
                 var game = new BlackjackGame(DefaultSettings, new Random(seed));
                 game.PlaceBet(10);
                 game.Deal();
+                // Insurance may be offered when dealer shows Ace; decline to reach normal resolution
+                if (game.State == GameState.InsuranceOffered)
+                    game.DeclineInsurance();
                 if (game.Result == GameResult.Push &&
                     game.PlayerHand.IsBlackjack &&
                     game.DealerHand.IsBlackjack)
@@ -787,6 +796,379 @@ public class BlackjackGameTests
             game.StartNewRound();
             game.Result.Should().BeNull();
             game.CurrentBet.Should().Be(0);
+        }
+    }
+
+    public class InsuranceTests
+    {
+        /// <summary>
+        /// Helper: find a game where dealer's upcard is Ace (insurance should be offered).
+        /// Returns a game in InsuranceOffered state.
+        /// </summary>
+        private static BlackjackGame CreateGameWithDealerAceUpcard(decimal bet = 10m)
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(bet);
+                game.Deal();
+                if (game.State == GameState.InsuranceOffered)
+                    return game;
+            }
+            throw new InvalidOperationException("Could not find a seed with dealer Ace upcard.");
+        }
+
+        /// <summary>
+        /// Helper: find a game in InsuranceOffered state where the dealer also has blackjack.
+        /// </summary>
+        private static BlackjackGame CreateGameWithDealerAceUpcardAndBlackjack(decimal bet = 10m)
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(bet);
+                game.Deal();
+                if (game.State == GameState.InsuranceOffered && game.DealerHand.IsBlackjack)
+                    return game;
+            }
+            throw new InvalidOperationException("Could not find a seed with dealer Ace upcard and blackjack.");
+        }
+
+        /// <summary>
+        /// Helper: find a game in InsuranceOffered state where the dealer does NOT have blackjack,
+        /// and the player also does NOT have blackjack.
+        /// </summary>
+        private static BlackjackGame CreateGameWithDealerAceUpcardNoBlackjack(decimal bet = 10m)
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(bet);
+                game.Deal();
+                if (game.State == GameState.InsuranceOffered &&
+                    !game.DealerHand.IsBlackjack &&
+                    !game.PlayerHand.IsBlackjack)
+                    return game;
+            }
+            throw new InvalidOperationException("Could not find a seed with dealer Ace upcard and no blackjack.");
+        }
+
+        /// <summary>
+        /// Helper: find a game in InsuranceOffered state where dealer has blackjack but player does NOT.
+        /// </summary>
+        private static BlackjackGame CreateGameWithDealerBlackjackPlayerNoBlackjack(decimal bet = 10m)
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(bet);
+                game.Deal();
+                if (game.State == GameState.InsuranceOffered &&
+                    game.DealerHand.IsBlackjack &&
+                    !game.PlayerHand.IsBlackjack)
+                    return game;
+            }
+            throw new InvalidOperationException("Could not find a seed with dealer Ace blackjack and no player blackjack.");
+        }
+
+        /// <summary>
+        /// Helper: find a game in InsuranceOffered state where BOTH player and dealer have blackjack.
+        /// </summary>
+        private static BlackjackGame CreateGameWithBothBlackjacks(decimal bet = 10m)
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(bet);
+                game.Deal();
+                if (game.State == GameState.InsuranceOffered &&
+                    game.PlayerHand.IsBlackjack &&
+                    game.DealerHand.IsBlackjack)
+                    return game;
+            }
+            throw new InvalidOperationException("Could not find a seed with both blackjacks and Ace upcard.");
+        }
+
+        /// <summary>
+        /// Helper: find a game where dealer has blackjack with a non-Ace upcard (no insurance offered).
+        /// </summary>
+        private static BlackjackGame CreateGameWithNonAceDealerBlackjack(decimal bet = 10m)
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(bet);
+                game.Deal();
+                if (game.DealerHand.IsBlackjack &&
+                    game.DealerHand.Cards[0].Rank != Rank.Ace &&
+                    game.State == GameState.Resolved)
+                    return game;
+            }
+            throw new InvalidOperationException("Could not find a seed for non-Ace dealer blackjack.");
+        }
+
+
+        private static BlackjackGame CreateGameWithPlayerBlackjackDealerAceNoBlackjack(decimal bet = 10m)
+        {
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(DefaultSettings, new Random(seed));
+                game.PlaceBet(bet);
+                game.Deal();
+                if (game.State == GameState.InsuranceOffered &&
+                    game.PlayerHand.IsBlackjack &&
+                    !game.DealerHand.IsBlackjack)
+                    return game;
+            }
+            throw new InvalidOperationException("Could not find a seed with player blackjack and dealer Ace no blackjack.");
+        }
+
+        [Fact]
+        public void DealerAceUpcard_TransitionsToInsuranceOfferedState()
+        {
+            var game = CreateGameWithDealerAceUpcard();
+            game.State.Should().Be(GameState.InsuranceOffered);
+            game.DealerHand.Cards[0].Rank.Should().Be(Rank.Ace);
+        }
+
+        [Fact]
+        public void InsuranceOffered_DealerCardRemainsHidden()
+        {
+            var game = CreateGameWithDealerAceUpcard();
+            game.IsDealerCardHidden.Should().BeTrue();
+        }
+
+        [Fact]
+        public void GetAvailableActions_InInsuranceOfferedState_ReturnsTakeAndDecline()
+        {
+            var game = CreateGameWithDealerAceUpcard();
+            var actions = game.GetAvailableActions();
+            actions.Should().Contain(GameAction.TakeInsurance);
+            actions.Should().Contain(GameAction.DeclineInsurance);
+        }
+
+        [Fact]
+        public void GetAvailableActions_InInsuranceOfferedState_DoesNotIncludeHitOrStand()
+        {
+            var game = CreateGameWithDealerAceUpcard();
+            var actions = game.GetAvailableActions();
+            actions.Should().NotContain(GameAction.Hit);
+            actions.Should().NotContain(GameAction.Stand);
+        }
+
+        [Fact]
+        public void TakeInsurance_CostsHalfTheOriginalBet()
+        {
+            var game = CreateGameWithDealerAceUpcardNoBlackjack();
+            var balanceBefore = game.PlayerBalance;
+            var expectedCost = game.CurrentBet / 2;
+            game.TakeInsurance();
+            // Balance should be reduced by insurance cost (if no immediate resolution)
+            // We check InsuranceBet was set correctly
+            game.InsuranceBet.Should().Be(expectedCost);
+        }
+
+        [Fact]
+        public void TakeInsurance_DeductsHalfBetFromBalance()
+        {
+            var game = CreateGameWithDealerAceUpcardNoBlackjack();
+            var balanceBefore = game.PlayerBalance;
+            var insuranceCost = game.CurrentBet / 2;
+            game.TakeInsurance();
+            // After taking insurance (no dealer BJ), play continues to PlayerTurn
+            // so balance should be reduced by insurance cost
+            game.PlayerBalance.Should().Be(balanceBefore - insuranceCost);
+        }
+
+        [Fact]
+        public void TakeInsurance_DealerHasBlackjack_InsurancePays2To1()
+        {
+            var game = CreateGameWithDealerAceUpcardAndBlackjack();
+            var balanceBefore = game.PlayerBalance;
+            var insuranceCost = game.CurrentBet / 2;
+            game.TakeInsurance();
+            // Insurance pays 2:1 → player gets back 3x insurance bet
+            // Main hand loses (no push because we're using the non-player-BJ case)
+            // So net: +insuranceCost * 2 (profit) - currentBet (already deducted at PlaceBet)
+            game.State.Should().Be(GameState.Resolved);
+            // balance = balanceBefore - insuranceCost + insuranceCost * 3 + mainHandPayout(0 for lose)
+            var expectedBalance = balanceBefore - insuranceCost + insuranceCost * 3 + 0m;
+            game.PlayerBalance.Should().Be(expectedBalance);
+        }
+
+        [Fact]
+        public void TakeInsurance_DealerHasBlackjack_MainHandLoses()
+        {
+            var game = CreateGameWithDealerBlackjackPlayerNoBlackjack();
+            game.TakeInsurance();
+            game.State.Should().Be(GameState.Resolved);
+            game.Result.Should().Be(GameResult.Lose);
+        }
+
+        [Fact]
+        public void DeclineInsurance_DealerHasBlackjack_MainHandLoses()
+        {
+            var game = CreateGameWithDealerBlackjackPlayerNoBlackjack();
+            var balanceBefore = game.PlayerBalance;
+            game.DeclineInsurance();
+            game.State.Should().Be(GameState.Resolved);
+            game.Result.Should().Be(GameResult.Lose);
+            game.PlayerBalance.Should().Be(balanceBefore); // no insurance payout, bet already lost
+        }
+
+        [Fact]
+        public void DeclineInsurance_NoDealerBlackjack_ContinuesToPlayerTurn()
+        {
+            var game = CreateGameWithDealerAceUpcardNoBlackjack();
+            game.DeclineInsurance();
+            game.State.Should().Be(GameState.PlayerTurn);
+        }
+
+        [Fact]
+        public void TakeInsurance_NoDealerBlackjack_InsuranceLostAndPlayContinues()
+        {
+            var game = CreateGameWithDealerAceUpcardNoBlackjack();
+            var balanceBefore = game.PlayerBalance;
+            var insuranceCost = game.CurrentBet / 2;
+            game.TakeInsurance();
+            game.State.Should().Be(GameState.PlayerTurn);
+            game.InsuranceBet.Should().Be(insuranceCost);
+            // Insurance bet was deducted and lost — balance reduced
+            game.PlayerBalance.Should().Be(balanceBefore - insuranceCost);
+        }
+
+        [Fact]
+        public void BothBlackjack_DeclineInsurance_ResolvesAsPush()
+        {
+            var game = CreateGameWithBothBlackjacks();
+            game.DeclineInsurance();
+            game.State.Should().Be(GameState.Resolved);
+            game.Result.Should().Be(GameResult.Push);
+        }
+
+        [Fact]
+        public void BothBlackjack_TakeInsurance_ResolvesAsPushAndInsurancePays()
+        {
+            var game = CreateGameWithBothBlackjacks();
+            var balanceBefore = game.PlayerBalance;
+            var insuranceCost = game.CurrentBet / 2;
+            game.TakeInsurance();
+            game.State.Should().Be(GameState.Resolved);
+            game.Result.Should().Be(GameResult.Push);
+            // insurance pays 2:1 + main hand push returns bet
+            var expectedBalance = balanceBefore - insuranceCost + insuranceCost * 3 + game.CurrentBet;
+            game.PlayerBalance.Should().Be(expectedBalance);
+        }
+
+        [Fact]
+        public void PlayerBlackjack_NoDealerBlackjack_DeclineInsurance_ResolvesAsBlackjack()
+        {
+            var game = CreateGameWithPlayerBlackjackDealerAceNoBlackjack();
+            game.DeclineInsurance();
+            game.State.Should().Be(GameState.Resolved);
+            game.Result.Should().Be(GameResult.Blackjack);
+        }
+
+        [Fact]
+        public void PlayerBlackjack_NoDealerBlackjack_TakeInsurance_InsuranceLostAndBlackjackPays()
+        {
+            var game = CreateGameWithPlayerBlackjackDealerAceNoBlackjack();
+            var balanceBefore = game.PlayerBalance;
+            var insuranceCost = game.CurrentBet / 2;
+            game.TakeInsurance();
+            game.State.Should().Be(GameState.Resolved);
+            game.Result.Should().Be(GameResult.Blackjack);
+            // insurance lost (already deducted), blackjack pays 2.5x bet
+            var expectedBalance = balanceBefore - insuranceCost + game.CurrentBet * 2.5m;
+            game.PlayerBalance.Should().Be(expectedBalance);
+        }
+
+        [Fact]
+        public void CannotTakeInsurance_InWrongState()
+        {
+            var game = CreateGame();
+            var act = () => game.TakeInsurance();
+            act.Should().Throw<InvalidOperationException>();
+        }
+
+        [Fact]
+        public void CannotDeclineInsurance_InWrongState()
+        {
+            var game = CreateGame();
+            var act = () => game.DeclineInsurance();
+            act.Should().Throw<InvalidOperationException>();
+        }
+
+        [Fact]
+        public void TakeInsurance_WithInsufficientBalance_Throws()
+        {
+            // Use settings where player can barely bet minimum and can't afford insurance
+            var settings = new GameSettings { StartingBalance = 6m, MinBet = 5m };
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(settings, new Random(seed));
+                game.PlaceBet(5m); // balance is now 1, insurance would cost 2.5
+                game.Deal();
+                if (game.State == GameState.InsuranceOffered)
+                {
+                    var act = () => game.TakeInsurance();
+                    act.Should().Throw<InvalidOperationException>();
+                    return;
+                }
+            }
+            throw new InvalidOperationException("Could not find a seed for this scenario.");
+        }
+
+        [Fact]
+        public void GetAvailableActions_ExcludesTakeInsurance_WhenInsufficientBalance()
+        {
+            var settings = new GameSettings { StartingBalance = 6m, MinBet = 5m };
+            for (int seed = 0; seed < 100000; seed++)
+            {
+                var game = new BlackjackGame(settings, new Random(seed));
+                game.PlaceBet(5m); // balance is now 1, insurance would cost 2.5
+                game.Deal();
+                if (game.State == GameState.InsuranceOffered)
+                {
+                    var actions = game.GetAvailableActions();
+                    actions.Should().NotContain(GameAction.TakeInsurance);
+                    actions.Should().Contain(GameAction.DeclineInsurance);
+                    return;
+                }
+            }
+            throw new InvalidOperationException("Could not find a seed for this scenario.");
+        }
+
+        [Fact]
+        public void InsuranceBet_ResetAfterNewRound()
+        {
+            var game = CreateGameWithDealerAceUpcardNoBlackjack();
+            game.TakeInsurance();
+            game.InsuranceBet.Should().BeGreaterThan(0);
+
+            while (game.State == GameState.PlayerTurn)
+                game.Stand();
+            if (game.State == GameState.DealerTurn)
+                game.ResolveDealerTurn();
+
+            game.StartNewRound();
+            game.InsuranceBet.Should().Be(0);
+        }
+
+        [Fact]
+        public void DealerCardRevealedAfterInsuranceResolvesRound()
+        {
+            var game = CreateGameWithDealerAceUpcardAndBlackjack();
+            game.TakeInsurance();
+            game.IsDealerCardHidden.Should().BeFalse();
+        }
+
+        [Fact]
+        public void NonAceUpcard_DealerBlackjack_ResolvesImmediatelyWithoutInsurance()
+        {
+            var game = CreateGameWithNonAceDealerBlackjack();
+            // Insurance was NOT offered (non-Ace upcard), hand resolves directly
+            game.State.Should().Be(GameState.Resolved);
         }
     }
 }

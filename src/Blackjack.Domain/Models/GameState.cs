@@ -4,6 +4,7 @@ public enum GameState
 {
     WaitingForBet,
     Dealing,
+    InsuranceOffered,
     PlayerTurn,
     DealerTurn,
     Resolved

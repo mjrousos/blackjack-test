@@ -16,7 +16,10 @@ public class BlackjackGame : IGameService
     public GameResult? Result { get; private set; }
     public List<GameResult?> SplitResults { get; } = [];
     public bool IsDealerCardHidden { get; private set; }
+    public decimal InsuranceBet { get; private set; }
     public Shoe Shoe { get; }
+
+    private bool _playerBlackjackAtDeal;
 
     public BlackjackGame(GameSettings settings, Random? random = null)
     {
@@ -62,6 +65,16 @@ public class BlackjackGame : IGameService
 
         // Check for natural blackjacks
         bool playerBj = PlayerHand.IsBlackjack;
+        bool dealerUpcardIsAce = DealerHand.Cards[0].Rank == Rank.Ace;
+
+        // When dealer shows an Ace, offer insurance before checking the hole card
+        if (dealerUpcardIsAce)
+        {
+            _playerBlackjackAtDeal = playerBj;
+            State = GameState.InsuranceOffered;
+            return;
+        }
+
         bool dealerBj = DealerHand.IsBlackjack;
 
         if (playerBj && dealerBj)
@@ -199,6 +212,30 @@ public class BlackjackGame : IGameService
         }
     }
 
+    public void TakeInsurance()
+    {
+        if (State != GameState.InsuranceOffered)
+            throw new InvalidOperationException($"Cannot take insurance in {State} state.");
+
+        decimal insuranceCost = CurrentBet / 2;
+        if (insuranceCost > PlayerBalance)
+            throw new InvalidOperationException("Insufficient balance to take insurance.");
+
+        PlayerBalance -= insuranceCost;
+        InsuranceBet = insuranceCost;
+
+        ResolveAfterInsuranceDecision();
+    }
+
+    public void DeclineInsurance()
+    {
+        if (State != GameState.InsuranceOffered)
+            throw new InvalidOperationException($"Cannot decline insurance in {State} state.");
+
+        InsuranceBet = 0;
+        ResolveAfterInsuranceDecision();
+    }
+
     public void ResolveDealerTurn()
     {
         if (State != GameState.DealerTurn)
@@ -219,6 +256,15 @@ public class BlackjackGame : IGameService
 
     public List<GameAction> GetAvailableActions()
     {
+        if (State == GameState.InsuranceOffered)
+        {
+            var insuranceActions = new List<GameAction>();
+            if (CurrentBet / 2 <= PlayerBalance)
+                insuranceActions.Add(GameAction.TakeInsurance);
+            insuranceActions.Add(GameAction.DeclineInsurance);
+            return insuranceActions;
+        }
+
         if (State != GameState.PlayerTurn)
             return [];
 
@@ -269,6 +315,8 @@ public class BlackjackGame : IGameService
         Result = null;
         ActiveHandIndex = 0;
         IsDealerCardHidden = false;
+        InsuranceBet = 0;
+        _playerBlackjackAtDeal = false;
         State = GameState.WaitingForBet;
 
         if (Shoe.PenetrationReached)
@@ -292,6 +340,43 @@ public class BlackjackGame : IGameService
             return PlayerHand;
 
         return SplitHands[ActiveHandIndex - 1];
+    }
+
+    private void ResolveAfterInsuranceDecision()
+    {
+        bool dealerBj = DealerHand.IsBlackjack;
+
+        if (dealerBj)
+        {
+            IsDealerCardHidden = false;
+
+            // Pay out insurance 2:1 if taken
+            if (InsuranceBet > 0)
+                PlayerBalance += InsuranceBet * 3;
+
+            // Resolve main hand: push if player also had blackjack, otherwise lose
+            Result = _playerBlackjackAtDeal ? GameResult.Push : GameResult.Lose;
+            SplitResults.Clear();
+            SplitResults.Add(Result);
+            PlayerBalance += CalculatePayout();
+            State = GameState.Resolved;
+        }
+        else if (_playerBlackjackAtDeal)
+        {
+            // Player has blackjack, dealer does not
+            IsDealerCardHidden = false;
+            Result = GameResult.Blackjack;
+            SplitResults.Clear();
+            SplitResults.Add(GameResult.Blackjack);
+            PlayerBalance += CalculatePayout();
+            State = GameState.Resolved;
+        }
+        else
+        {
+            // No blackjacks — continue with normal player turn
+            State = GameState.PlayerTurn;
+            ActiveHandIndex = 0;
+        }
     }
 
     private void AdvanceAfterHandComplete()
