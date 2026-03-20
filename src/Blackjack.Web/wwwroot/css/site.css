@@ -1,5 +1,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap');
 
+:root {
+  /* Felt / Page Background */
+  --felt-bg: #1a472a;
+
+  /* Header Bar */
+  --header-start: #3d2214;
+  --header-mid: #2d1810;
+  --header-end: #1a0f0a;
+
+  /* Accent Color */
+  --accent: #c9a44c;
+  --accent-rgb: 201, 164, 76;
+  --accent-hover: #d4b05c;
+  --accent-dark: #a07830;
+
+  /* Text Colors */
+  --text-primary: #e8e0d0;
+  --text-muted: #a09880;
+  --text-nav: #d4c4a0;
+
+  /* Overlay base for panels/inputs */
+  --overlay-rgb: 0, 0, 0;
+
+  /* Buttons */
+  --btn-primary-start: #c9a44c;
+  --btn-primary-end: #a07830;
+  --btn-primary-text: #1a0f0a;
+  --btn-primary-hover-start: #dbb85c;
+  --btn-primary-hover-end: #b88840;
+
+  /* Playing Card Backs */
+  --card-back-start: #1a3a6b;
+  --card-back-end: #2c5aa0;
+
+  /* Chip Selector */
+  --chip-btn-start: #2c3e50;
+  --chip-btn-end: #1a252f;
+}
+
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -8,14 +47,14 @@
 
 html, body {
     font-family: 'Lato', sans-serif;
-    background: #1a472a;
-    color: #e8e0d0;
+    background: var(--felt-bg);
+    color: var(--text-primary);
     min-height: 100vh;
 }
 
 h1, h2, h3, h4 {
     font-family: 'Playfair Display', serif;
-    color: #c9a44c;
+    color: var(--accent);
 }
 
 /* Felt texture overlay */
@@ -30,8 +69,8 @@ body::before {
         0deg,
         transparent,
         transparent 2px,
-        rgba(0, 0, 0, 0.03) 2px,
-        rgba(0, 0, 0, 0.03) 4px
+        rgba(var(--overlay-rgb), 0.03) 2px,
+        rgba(var(--overlay-rgb), 0.03) 4px
     );
     pointer-events: none;
     z-index: 0;
@@ -54,13 +93,13 @@ body::before {
 }
 
 .btn-primary {
-    background: linear-gradient(to bottom, #c9a44c, #a07830);
-    color: #1a0f0a;
+    background: linear-gradient(to bottom, var(--btn-primary-start), var(--btn-primary-end));
+    color: var(--btn-primary-text);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(to bottom, #dbb85c, #b88840);
+    background: linear-gradient(to bottom, var(--btn-primary-hover-start), var(--btn-primary-hover-end));
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
@@ -95,8 +134,8 @@ body::before {
 
 /* Cards panel */
 .panel {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(201, 164, 76, 0.3);
+    background: rgba(var(--overlay-rgb), 0.3);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
     border-radius: 10px;
     padding: 1.5rem;
     backdrop-filter: blur(5px);
@@ -107,9 +146,9 @@ input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="number"] {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(201, 164, 76, 0.4);
-    color: #e8e0d0;
+    background: rgba(var(--overlay-rgb), 0.4);
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
+    color: var(--text-primary);
     padding: 0.6rem 1rem;
     border-radius: 6px;
     font-size: 1rem;
@@ -119,8 +158,8 @@ input[type="number"] {
 
 input:focus {
     outline: none;
-    border-color: #c9a44c;
-    box-shadow: 0 0 5px rgba(201, 164, 76, 0.3);
+    border-color: var(--accent);
+    box-shadow: 0 0 5px rgba(var(--accent-rgb), 0.3);
 }
 
 /* Validation messages */
@@ -137,12 +176,12 @@ table {
 }
 
 th {
-    background: rgba(201, 164, 76, 0.2);
-    color: #c9a44c;
+    background: rgba(var(--accent-rgb), 0.2);
+    color: var(--accent);
     padding: 0.75rem;
     text-align: left;
     font-weight: 600;
-    border-bottom: 2px solid rgba(201, 164, 76, 0.3);
+    border-bottom: 2px solid rgba(var(--accent-rgb), 0.3);
 }
 
 td {
@@ -151,11 +190,11 @@ td {
 }
 
 tr:hover {
-    background: rgba(201, 164, 76, 0.05);
+    background: rgba(var(--accent-rgb), 0.05);
 }
 
 /* Utility */
-.text-gold { color: #c9a44c; }
+.text-gold { color: var(--accent); }
 .text-green { color: #2ecc71; }
 .text-red { color: #e74c3c; }
 .text-center { text-align: center; }
@@ -194,10 +233,10 @@ tr:hover {
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(var(--overlay-rgb), 0.2);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(201, 164, 76, 0.5);
+    background: rgba(var(--accent-rgb), 0.5);
     border-radius: 4px;
 }

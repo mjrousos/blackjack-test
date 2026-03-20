@@ -1,0 +1,79 @@
+/* Theme Overrides — Midnight Blue */
+[data-theme="midnight-blue"] {
+    /* Felt / Page Background */
+    --felt-bg: #0a1628;
+
+    /* Header Bar */
+    --header-start: #1a2a3a;
+    --header-mid: #0f1a2a;
+    --header-end: #0a1018;
+
+    /* Accent Color (ice blue) */
+    --accent: #7eb8da;
+    --accent-rgb: 126, 184, 218;
+    --accent-hover: #a8d4ef;
+    --accent-dark: #5a98ba;
+
+    /* Text Colors */
+    --text-primary: #d0dde8;
+    --text-muted: #8899aa;
+    --text-nav: #a0b8cc;
+
+    /* Overlay base */
+    --overlay-rgb: 0, 10, 25;
+
+    /* Buttons */
+    --btn-primary-start: #7eb8da;
+    --btn-primary-end: #5a98ba;
+    --btn-primary-text: #0a1018;
+    --btn-primary-hover-start: #a8d4ef;
+    --btn-primary-hover-end: #7eb8da;
+
+    /* Playing Card Backs */
+    --card-back-start: #1a3050;
+    --card-back-end: #2a5070;
+
+    /* Chip Selector */
+    --chip-btn-start: #1a2a40;
+    --chip-btn-end: #0f1a28;
+}
+
+/* Theme Overrides — Royal Purple */
+[data-theme="royal-purple"] {
+    /* Felt / Page Background */
+    --felt-bg: #1a0a2e;
+
+    /* Header Bar */
+    --header-start: #3a1a4a;
+    --header-mid: #2a1038;
+    --header-end: #1a0825;
+
+    /* Accent Color (rose gold) */
+    --accent: #d4a0c8;
+    --accent-rgb: 212, 160, 200;
+    --accent-hover: #e0b8d8;
+    --accent-dark: #b880a8;
+
+    /* Text Colors */
+    --text-primary: #e0d8e8;
+    --text-muted: #9888a8;
+    --text-nav: #c0a8d0;
+
+    /* Overlay base */
+    --overlay-rgb: 15, 0, 25;
+
+    /* Buttons */
+    --btn-primary-start: #d4a0c8;
+    --btn-primary-end: #b880a8;
+    --btn-primary-text: #1a0825;
+    --btn-primary-hover-start: #e0b8d8;
+    --btn-primary-hover-end: #d4a0c8;
+
+    /* Playing Card Backs */
+    --card-back-start: #3a1a5a;
+    --card-back-end: #5a2a8a;
+
+    /* Chip Selector */
+    --chip-btn-start: #2a1040;
+    --chip-btn-end: #1a0828;
+}

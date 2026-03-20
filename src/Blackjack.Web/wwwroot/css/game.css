@@ -10,8 +10,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(201, 164, 76, 0.3);
+    background: rgba(var(--overlay-rgb), 0.3);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
     border-radius: 10px;
     padding: 0.75rem 1.25rem;
     flex-wrap: wrap;
@@ -25,7 +25,7 @@
 
 .balance-label {
     font-size: 0.75rem;
-    color: #a09880;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -33,7 +33,7 @@
 .balance-value {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #c9a44c;
+    color: var(--accent);
 }
 
 .current-bet {
@@ -43,7 +43,7 @@
 }
 
 .bet-label {
-    color: #e8e0d0;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -69,8 +69,8 @@
     height: 60px;
     border-radius: 50%;
     border: 3px dashed rgba(255, 255, 255, 0.4);
-    background: linear-gradient(135deg, #2c3e50, #1a252f);
-    color: #c9a44c;
+    background: linear-gradient(135deg, var(--chip-btn-start), var(--chip-btn-end));
+    color: var(--accent);
     font-weight: bold;
     font-size: 0.75rem;
     cursor: pointer;
@@ -82,15 +82,15 @@
 
 .chip-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 0 10px rgba(201, 164, 76, 0.5);
+    box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5);
 }
 
 .chip-btn.selected {
-    border-color: #c9a44c;
-    background: linear-gradient(135deg, #c9a44c, #a07830);
-    color: #1a0f0a;
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: var(--btn-primary-text);
     transform: scale(1.15);
-    box-shadow: 0 0 15px rgba(201, 164, 76, 0.7);
+    box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.7);
 }
 
 .bet-confirm {
@@ -144,8 +144,8 @@
 
 .btn-outline {
     background: transparent;
-    border: 1px solid #c9a44c;
-    color: #c9a44c;
+    border: 1px solid var(--accent);
+    color: var(--accent);
     padding: 0.4rem 1.2rem;
     border-radius: 6px;
     cursor: pointer;
@@ -154,6 +154,6 @@
 }
 
 .btn-outline:hover {
-    background: rgba(201, 164, 76, 0.2);
+    background: rgba(var(--accent-rgb), 0.2);
     color: #fff;
 }

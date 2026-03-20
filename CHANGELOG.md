@@ -4,6 +4,16 @@ All notable changes to the Blackjack project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.0] - 2026-03-20
+
+### Added
+
+- Theme selector in the navigation bar with three color themes: Classic Casino (default green), Midnight Blue (navy), and Royal Purple
+- CSS custom properties for all theme colors, enabling easy customization and extension
+- Theme persistence via localStorage — preference is remembered across sessions and applies to all pages including login and registration
+- bUnit component tests for the ThemeSelector component
+- Playwright end-to-end tests for theme switching and persistence
+
 ## [1.0.0] - 2026-03-05
 
 Initial release of the Blackjack web application.
@@ -25,4 +35,5 @@ Initial release of the Blackjack web application.
 - Component tests for Blazor UI (bUnit)
 - End-to-end tests with Playwright
 
+[1.1.0]: https://github.com/mjrousos/Blackjack/compare/425230e...HEAD
 [1.0.0]: https://github.com/mjrousos/Blackjack/commits/425230e

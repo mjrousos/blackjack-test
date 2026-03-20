@@ -8,7 +8,27 @@
     <link rel="stylesheet" href="css/cards.css" />
     <link rel="stylesheet" href="css/game.css" />
     <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/themes.css" />
     <link rel="stylesheet" href="Blackjack.Web.styles.css" />
+    <script>
+        // Apply saved theme before first paint to prevent flash
+        (function() {
+            var theme = localStorage.getItem('blackjack-theme');
+            if (theme) document.documentElement.setAttribute('data-theme', theme);
+        })();
+        function setTheme(name) {
+            if (name) {
+                document.documentElement.setAttribute('data-theme', name);
+                localStorage.setItem('blackjack-theme', name);
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.removeItem('blackjack-theme');
+            }
+        }
+        function getTheme() {
+            return localStorage.getItem('blackjack-theme') || '';
+        }
+    </script>
     <HeadOutlet />
 </head>
 <body>
